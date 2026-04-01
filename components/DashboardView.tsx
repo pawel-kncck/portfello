@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
-import { Plus, DollarSign, Calendar, TrendingUp } from 'lucide-react'
+import { Plus, DollarSign, Calendar, TrendingUp, Pencil, Trash2 } from 'lucide-react'
+import { AddExpenseModal } from './AddExpenseModal'
+import { EditExpenseModal } from './EditExpenseModal'
 
 interface Expense {
   id: string
@@ -13,24 +15,65 @@ interface Expense {
   date: string
   description: string
   createdAt: string
+  updatedAt?: string
 }
 
 export function DashboardView() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
 
-  useEffect(() => {
-    fetchExpenses()
-  }, [])
-
-  const fetchExpenses = async () => {
+  const fetchExpenses = useCallback(async () => {
     try {
-      // TODO: Replace with /api/expenses call (Step 4)
-      setExpenses([])
+      const res = await fetch('/api/expenses')
+      if (res.ok) {
+        const data = await res.json()
+        setExpenses(data.expenses || [])
+      }
     } catch (error) {
       console.log('Error fetching expenses:', error)
     } finally {
       setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchExpenses()
+  }, [fetchExpenses])
+
+  const handleAdd = async (expense: { amount: number; category: string; date: string; description: string }) => {
+    const res = await fetch('/api/expenses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(expense),
+    })
+    if (!res.ok) {
+      const data = await res.json()
+      return { success: false, error: data.error || 'Failed to add expense' }
+    }
+    await fetchExpenses()
+    return { success: true }
+  }
+
+  const handleUpdate = async (id: string, data: Partial<Expense>) => {
+    const res = await fetch(`/api/expenses/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+      const err = await res.json()
+      return { success: false, error: err.error || 'Failed to update expense' }
+    }
+    await fetchExpenses()
+    return { success: true }
+  }
+
+  const handleDelete = async (id: string) => {
+    const res = await fetch(`/api/expenses/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      await fetchExpenses()
     }
   }
 
@@ -50,7 +93,7 @@ export function DashboardView() {
             Track and manage your expenses efficiently
           </p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowAddModal(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Expense
         </Button>
@@ -124,12 +167,35 @@ export function DashboardView() {
                       {new Date(expense.date).toLocaleDateString()} - {expense.description || 'No description'}
                     </p>
                   </div>
+                  <div className="flex space-x-2">
+                    <Button variant="ghost" size="sm" onClick={() => setEditingExpense(expense)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      <AddExpenseModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAdd}
+      />
+
+      {editingExpense && (
+        <EditExpenseModal
+          expense={editingExpense}
+          isOpen={!!editingExpense}
+          onClose={() => setEditingExpense(null)}
+          onUpdate={handleUpdate}
+        />
+      )}
     </div>
   )
 }

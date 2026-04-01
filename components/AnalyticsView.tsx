@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
@@ -23,20 +23,23 @@ export function AnalyticsView() {
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('all')
 
-  useEffect(() => {
-    fetchExpenses()
-  }, [])
-
-  const fetchExpenses = async () => {
+  const fetchExpenses = useCallback(async () => {
     try {
-      // TODO: Replace with /api/expenses call (Step 4)
-      setExpenses([])
+      const res = await fetch('/api/expenses')
+      if (res.ok) {
+        const data = await res.json()
+        setExpenses(data.expenses || [])
+      }
     } catch (error) {
       console.log('Error fetching expenses:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchExpenses()
+  }, [fetchExpenses])
 
   const getFilteredExpenses = () => {
     const now = new Date()

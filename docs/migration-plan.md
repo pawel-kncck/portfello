@@ -122,30 +122,36 @@ Migrate Portfello from a Vite SPA + Supabase stack to a Next.js + PostgreSQL + A
 
 ## Step 4: Rewrite API Endpoints as Next.js Route Handlers
 
-**Goal:** Replace Supabase Edge Functions with Next.js API routes using Drizzle.
+**Status: COMPLETED** (commit pending)
 
-**Current endpoints → New routes:**
-
-| Current (Hono/Deno) | New (Next.js) |
-|---|---|
-| `POST /signup` | Handled by Auth.js (Step 3) |
-| `GET /expenses` | `GET /api/expenses` |
-| `POST /expenses` | `POST /api/expenses` |
-| `PUT /expenses/:id` | `PUT /api/expenses/[id]` |
-| `DELETE /expenses/:id` | `DELETE /api/expenses/[id]` |
+**Goal:** Replace Supabase Edge Functions with Next.js API routes using Prisma.
 
 **Tasks:**
-- [ ] Create `app/api/expenses/route.ts` (GET list, POST create)
-- [ ] Create `app/api/expenses/[id]/route.ts` (PUT update, DELETE)
-- [ ] Use Prisma queries instead of KV store operations
-- [ ] Auth via `auth()` session helper (no more manual Bearer token parsing)
-- [ ] Update frontend components to call `/api/expenses` instead of Supabase function URLs
-- [ ] Remove `supabase/functions/` directory entirely
-- [ ] Remove `@supabase/supabase-js` dependency
+- [x] Create `app/api/expenses/route.ts` (GET list, POST create)
+- [x] Create `app/api/expenses/[id]/route.ts` (PUT update, DELETE)
+- [x] Use Prisma queries with proper Decimal→Number serialization
+- [x] Auth via `auth()` session helper with user ownership checks
+- [x] Wire DashboardView to fetch/add/edit/delete via `/api/expenses`
+- [x] Wire AnalyticsView to fetch from `/api/expenses`
+- [x] Integrate AddExpenseModal and EditExpenseModal into DashboardView
+- [x] Remove `supabase/` directory entirely
+- [x] Remove `@supabase/supabase-js` dependency
+- [x] Clean up tsconfig.json (remove supabase exclude)
+- [x] Build passes cleanly
+
+**Files created:**
+- `app/api/expenses/route.ts` — GET (list) + POST (create)
+- `app/api/expenses/[id]/route.ts` — PUT (update) + DELETE
 
 **Files removed:**
 - `supabase/functions/server/index.tsx`
 - `supabase/functions/server/kv_store.tsx`
+
+**Notes:**
+- All API routes check `auth()` session and verify expense ownership before mutations
+- Prisma `Decimal` fields are serialized to `Number` in API responses
+- DashboardView now has full CRUD: add via modal, edit via modal, delete inline
+- No Supabase dependencies remain in the project
 
 ---
 
