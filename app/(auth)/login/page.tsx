@@ -2,13 +2,22 @@
 
 import { LoginForm } from '@/components/LoginForm'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
   const router = useRouter()
 
-  // TODO: Replace with Auth.js signIn (Step 3)
   const handleLogin = async (email: string, password: string) => {
-    console.log('Login stub:', email)
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+    })
+
+    if (result?.error) {
+      return { success: false, error: 'Invalid email or password' }
+    }
+
     router.push('/dashboard')
     return { success: true }
   }

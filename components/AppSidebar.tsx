@@ -2,16 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
 import { BarChart3, Home, LogOut, User } from 'lucide-react'
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
 
-  // TODO: Get user from Auth.js session (Step 3)
-  const userName = 'User'
-  const userEmail = 'user@example.com'
+  const userName = session?.user?.name || 'User'
+  const userEmail = session?.user?.email || ''
 
   return (
     <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
@@ -64,8 +65,11 @@ export function AppSidebar() {
             </div>
           </div>
 
-          {/* TODO: Wire to Auth.js signOut (Step 3) */}
-          <Button variant="outline" className="w-full justify-start">
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={() => signOut({ callbackUrl: '/login' })}
+          >
             <LogOut className="mr-3 h-4 w-4" />
             Logout
           </Button>

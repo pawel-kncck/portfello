@@ -88,23 +88,35 @@ Migrate Portfello from a Vite SPA + Supabase stack to a Next.js + PostgreSQL + A
 
 **Goal:** Replace Supabase Auth with Auth.js (NextAuth v5).
 
+**Status: COMPLETED** (commit pending)
+
 **Tasks:**
-- [ ] Install `next-auth` and `@auth/prisma-adapter`
-- [ ] Configure Auth.js in `auth.ts` with Prisma adapter
-- [ ] Set up `Credentials` provider (email + password with bcrypt)
-- [ ] Add Auth.js session/account/verification models to Prisma schema
-- [ ] Create middleware (`middleware.ts`) to protect `/dashboard` and `/analytics` routes
-- [ ] Update Login and Signup forms to call Auth.js `signIn()` / server action
-- [ ] Update `.env.example` with `AUTH_SECRET` and `AUTH_URL` placeholders
-- [ ] Remove all Supabase Auth client SDK usage from the frontend
+- [x] Install `next-auth@beta`, `@auth/prisma-adapter`, `bcryptjs`
+- [x] Configure Auth.js in `auth.ts` with Prisma adapter and JWT session strategy
+- [x] Set up `Credentials` provider (email + password with bcrypt)
+- [x] Add Auth.js models (Account, Session, VerificationToken) to Prisma schema + migration
+- [x] Create middleware (`middleware.ts`) to protect `/dashboard` and `/analytics` routes
+- [x] Create signup server action (`app/(auth)/signup/action.ts`) with bcrypt hashing
+- [x] Wire login page to `signIn('credentials')` from `next-auth/react`
+- [x] Wire signup page to call signup action then auto-login via signIn
+- [x] Wire AppSidebar to `useSession()` for user info and `signOut()` for logout
+- [x] Add `SessionProvider` wrapper (`components/Providers.tsx`) to root layout
+- [x] Update root page (`/`) to check session and redirect accordingly
+- [x] Update `.env.example` with `AUTH_SECRET` and `AUTH_URL` placeholders
+- [x] Build passes cleanly with `next build`
 
 **Files created:**
-- `auth.ts`, `middleware.ts`
-- `app/api/auth/[...nextauth]/route.ts`
+- `auth.ts` — Auth.js config with Credentials provider + Prisma adapter
+- `middleware.ts` — protects /dashboard and /analytics
+- `app/api/auth/[...nextauth]/route.ts` — Auth.js route handler
+- `app/(auth)/signup/action.ts` — server action for user registration
+- `components/Providers.tsx` — SessionProvider wrapper
+- `prisma/migrations/20260401181334_add_auth_models/` — Account, Session, VerificationToken tables
 
-**Files removed:**
-- `utils/supabase/info.tsx`
-- Supabase client initialization in `App.tsx`
+**Notes:**
+- JWT session strategy used (not database sessions) for simpler Credentials flow
+- Supabase Auth is fully replaced — no Supabase SDK usage remains in auth flow
+- `passwordHash` field made optional on User to support potential future OAuth-only users
 
 ---
 

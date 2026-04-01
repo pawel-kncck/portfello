@@ -1,6 +1,12 @@
 import { redirect } from 'next/navigation'
+import { auth } from '@/auth'
 
-export default function Home() {
-  // TODO: Check auth session and redirect accordingly (Step 3)
+export default async function Home() {
+  const session = await auth()
+
+  if (session?.user) {
+    redirect('/dashboard')
+  }
+
   redirect('/login')
 }
