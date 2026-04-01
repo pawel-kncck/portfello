@@ -13,24 +13,40 @@ Migrate Portfello from a Vite SPA + Supabase stack to a Next.js + PostgreSQL + A
 
 **Goal:** Replace Vite with Next.js while preserving all existing UI.
 
+**Status: COMPLETED** (commit `875613e`)
+
 **Tasks:**
-- [ ] Initialize Next.js project with App Router and TypeScript
-- [ ] Configure Tailwind CSS (carry over `globals.css` design tokens)
-- [ ] Move shadcn/ui components into the Next.js `components/ui/` directory
-- [ ] Migrate page components (Dashboard, Analytics, Login, Signup) into Next.js `app/` routes
-- [ ] Migrate Sidebar and Layout into Next.js layout structure
-- [ ] Carry over Recharts, Lucide, React Hook Form, Zod dependencies
-- [ ] Remove Vite config, `src/main.tsx`, `src/vite-env.d.ts`, and `index.html`
-- [ ] Verify the app renders correctly with `next dev`
+- [x] Initialize Next.js project with App Router and TypeScript
+- [x] Configure Tailwind CSS (carry over `globals.css` design tokens)
+- [x] Move shadcn/ui components into the Next.js `components/ui/` directory
+- [x] Migrate page components (Dashboard, Analytics, Login, Signup) into Next.js `app/` routes
+- [x] Migrate Sidebar and Layout into Next.js layout structure
+- [x] Carry over Recharts, Lucide, React Hook Form, Zod dependencies
+- [x] Remove Vite config, `src/main.tsx`, `src/vite-env.d.ts`, and `index.html`
+- [x] Verify the app builds and renders correctly with `next build`
 
 **Files created:**
-- `next.config.js`
+- `next.config.js` (with `output: 'standalone'` for Docker)
 - `app/layout.tsx`, `app/page.tsx`
-- `app/(auth)/login/page.tsx`, `app/(auth)/signup/page.tsx`
-- `app/(app)/dashboard/page.tsx`, `app/(app)/analytics/page.tsx`
+- `app/(auth)/layout.tsx`, `app/(auth)/login/page.tsx`, `app/(auth)/signup/page.tsx`
+- `app/(app)/layout.tsx`, `app/(app)/dashboard/page.tsx`, `app/(app)/analytics/page.tsx`
+- `components/AppSidebar.tsx` (Next.js version using Link + usePathname)
+- `components/DashboardView.tsx` (self-contained, stubbed data fetching)
+- `components/AnalyticsView.tsx` (self-contained, stubbed data fetching)
 
 **Files removed:**
-- `vite.config.ts`, `index.html`, `src/main.tsx`, `src/vite-env.d.ts`
+- `vite.config.ts`, `index.html`, `src/main.tsx`, `src/vite-env.d.ts`, `tsconfig.node.json`
+- `App.tsx`, `components/Auth.tsx`, `components/Layout.tsx`
+- `components/Dashboard.tsx`, `components/DashboardPage.tsx`
+- `components/Analytics.tsx`, `components/AnalyticsPage.tsx`
+- `utils/supabase/info.tsx`
+- Unused shadcn/ui components: context-menu, hover-card, menubar, navigation-menu, breadcrumb, aspect-ratio, pagination, sonner
+
+**Notes:**
+- Auth pages use route group `(auth)` with centered layout (no sidebar)
+- App pages use route group `(app)` with sidebar layout
+- Login/signup handlers are stubs — will be wired to Auth.js in Step 3
+- Data fetching is stubbed — will be wired to /api/expenses in Step 4
 
 ---
 
