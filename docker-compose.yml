@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: portfello
+      POSTGRES_PASSWORD: portfello
+      POSTGRES_DB: portfello
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://portfello:portfello@db:5432/portfello?schema=public
+      AUTH_SECRET: ${AUTH_SECRET:-dev-secret-change-in-production}
+      AUTH_URL: http://localhost:3000
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
