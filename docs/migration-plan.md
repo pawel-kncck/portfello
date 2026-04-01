@@ -5,7 +5,7 @@
 Migrate Portfello from a Vite SPA + Supabase stack to a Next.js + PostgreSQL + Auth.js stack, containerized with Docker, and auto-deployed to Hetzner via GitHub Actions.
 
 **Current stack:** Vite SPA, Supabase Auth, Supabase Edge Functions (Hono/Deno), Supabase KV store
-**Target stack:** Next.js, Auth.js, PostgreSQL, Drizzle ORM, Docker, Caddy, GitHub Actions
+**Target stack:** Next.js, Auth.js, PostgreSQL, Prisma ORM, Docker, Caddy, GitHub Actions
 
 ---
 
@@ -50,36 +50,50 @@ Migrate Portfello from a Vite SPA + Supabase stack to a Next.js + PostgreSQL + A
 
 ---
 
-## Step 2: Set Up Drizzle + PostgreSQL Schema
+## Step 2: Set Up Prisma + PostgreSQL Schema
 
 **Goal:** Replace Supabase KV store with a proper relational schema.
 
 **Tasks:**
-- [ ] Install Drizzle ORM + `drizzle-kit` + `pg` driver
-- [ ] Define schema in `db/schema.ts`:
-  - `users` table (id, email, name, password_hash, created_at)
-  - `sessions` table (for Auth.js)
-  - `expenses` table (id, user_id FK, amount, category, description, date, created_at, updated_at)
-- [ ] Configure Drizzle connection (`db/index.ts`) reading `DATABASE_URL` from env
-- [ ] Generate initial migration with `drizzle-kit generate`
-- [ ] Add `drizzle.config.ts`
+- [ ] Install Prisma (`prisma` + `@prisma/client`)
+- [ ] Initialize Prisma with `npx prisma init` (creates `prisma/schema.prisma`)
+- [ ] Define schema in `prisma/schema.prisma`:
+  - `User` model (id, email, name, passwordHash, createdAt)
+  - Auth.js models (Account, Session, VerificationToken — added in Step 3)
+  - `Expense` model (id, userId FK, amount, category, description, date, createdAt, updatedAt)
+- [ ] Configure Prisma client singleton (`lib/prisma.ts`) reading `DATABASE_URL` from env
+- [ ] Generate migration with `npx prisma migrate dev`
 - [ ] Update `.env.example` with `DATABASE_URL` placeholder
 - [ ] Test migration against a local PostgreSQL instance
 
-**Schema — expenses table:**
-```sql
-CREATE TABLE expenses (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  amount DECIMAL(10,2) NOT NULL,
-  category VARCHAR(50) NOT NULL,
-  description TEXT,
-  date DATE NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ
-);
-CREATE INDEX idx_expenses_user_id ON expenses(user_id);
-CREATE INDEX idx_expenses_date ON expenses(date);
+**Schema — Prisma models:**
+```prisma
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  expenses     Expense[]
+
+  @@map("users")
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      Decimal  @db.Decimal(10, 2)
+  category    String   @db.VarChar(50)
+  description String?
+  date        DateTime @db.Date
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime? @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([date])
+  @@map("expenses")
+}
 ```
 
 ---
@@ -89,10 +103,10 @@ CREATE INDEX idx_expenses_date ON expenses(date);
 **Goal:** Replace Supabase Auth with Auth.js (NextAuth v5).
 
 **Tasks:**
-- [ ] Install `next-auth` and `@auth/drizzle-adapter`
-- [ ] Configure Auth.js in `auth.ts` with Drizzle adapter
+- [ ] Install `next-auth` and `@auth/prisma-adapter`
+- [ ] Configure Auth.js in `auth.ts` with Prisma adapter
 - [ ] Set up `Credentials` provider (email + password with bcrypt)
-- [ ] Add Auth.js session/account/verification tables to Drizzle schema
+- [ ] Add Auth.js session/account/verification models to Prisma schema
 - [ ] Create middleware (`middleware.ts`) to protect `/dashboard` and `/analytics` routes
 - [ ] Update Login and Signup forms to call Auth.js `signIn()` / server action
 - [ ] Update `.env.example` with `AUTH_SECRET` and `AUTH_URL` placeholders
@@ -125,7 +139,7 @@ CREATE INDEX idx_expenses_date ON expenses(date);
 **Tasks:**
 - [ ] Create `app/api/expenses/route.ts` (GET list, POST create)
 - [ ] Create `app/api/expenses/[id]/route.ts` (PUT update, DELETE)
-- [ ] Use Drizzle queries instead of KV store operations
+- [ ] Use Prisma queries instead of KV store operations
 - [ ] Auth via `auth()` session helper (no more manual Bearer token parsing)
 - [ ] Update frontend components to call `/api/expenses` instead of Supabase function URLs
 - [ ] Remove `supabase/functions/` directory entirely
@@ -243,11 +257,7 @@ AUTH_URL=https://portfello.yourdomain.com
 
 ## Cleanup After Migration
 
-- [ ] Remove `supabase/` directory
-- [ ] Remove `@supabase/supabase-js` from `package.json`
-- [ ] Remove `utils/supabase/` directory
-- [ ] Remove `vite.config.ts`, `postcss.config.js` (if recreated by Next.js)
-- [ ] Remove old `App.tsx` (replaced by Next.js layout/pages)
-- [ ] Remove `components/Auth.tsx` (unused even before migration)
+- [ ] Remove `supabase/` directory (done in Step 4)
+- [ ] Remove `@supabase/supabase-js` from `package.json` (done in Step 4)
 - [ ] Remove Figma-specific component (`components/figma/ImageWithFallback.tsx`) if unused
 - [ ] Audit `package.json` for unused dependencies
