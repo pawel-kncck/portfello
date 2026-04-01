@@ -54,47 +54,33 @@ Migrate Portfello from a Vite SPA + Supabase stack to a Next.js + PostgreSQL + A
 
 **Goal:** Replace Supabase KV store with a proper relational schema.
 
+**Status: COMPLETED** (commit pending)
+
 **Tasks:**
-- [ ] Install Prisma (`prisma` + `@prisma/client`)
-- [ ] Initialize Prisma with `npx prisma init` (creates `prisma/schema.prisma`)
-- [ ] Define schema in `prisma/schema.prisma`:
+- [x] Install Prisma (`prisma` + `@prisma/client` + `@prisma/adapter-pg`)
+- [x] Initialize Prisma with `npx prisma init` (creates `prisma/schema.prisma` + `prisma.config.ts`)
+- [x] Define schema in `prisma/schema.prisma`:
   - `User` model (id, email, name, passwordHash, createdAt)
-  - Auth.js models (Account, Session, VerificationToken — added in Step 3)
+  - Auth.js models (Account, Session, VerificationToken — to be added in Step 3)
   - `Expense` model (id, userId FK, amount, category, description, date, createdAt, updatedAt)
-- [ ] Configure Prisma client singleton (`lib/prisma.ts`) reading `DATABASE_URL` from env
-- [ ] Generate migration with `npx prisma migrate dev`
-- [ ] Update `.env.example` with `DATABASE_URL` placeholder
-- [ ] Test migration against a local PostgreSQL instance
+- [x] Configure Prisma client singleton (`lib/prisma.ts`) with PrismaPg adapter
+- [x] Generate and apply migration (`npx prisma migrate dev --name init`)
+- [x] Update `.env.example` with `DATABASE_URL` placeholder (replaced old Supabase vars)
+- [x] Test migration against local PostgreSQL — tables, indexes, and FK verified
+- [x] Add `postinstall` script for `prisma generate`
+- [x] Build passes cleanly with `next build`
 
-**Schema — Prisma models:**
-```prisma
-model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  name         String?
-  passwordHash String
-  createdAt    DateTime  @default(now())
-  expenses     Expense[]
+**Files created:**
+- `prisma/schema.prisma` — User + Expense models
+- `prisma.config.ts` — Prisma config with dotenv
+- `prisma/migrations/20260401180057_init/migration.sql` — initial migration
+- `lib/prisma.ts` — singleton PrismaClient with PrismaPg adapter
+- `generated/prisma/` — generated client (gitignored)
 
-  @@map("users")
-}
-
-model Expense {
-  id          String   @id @default(uuid())
-  userId      String
-  amount      Decimal  @db.Decimal(10, 2)
-  category    String   @db.VarChar(50)
-  description String?
-  date        DateTime @db.Date
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime? @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([date])
-  @@map("expenses")
-}
-```
+**Notes:**
+- Prisma 7.x requires a driver adapter (`@prisma/adapter-pg`) — no built-in query engine
+- `generated/prisma/` is gitignored; `postinstall` regenerates it on `npm install`
+- Old Supabase env vars removed from `.env.example`
 
 ---
 
