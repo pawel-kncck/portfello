@@ -1,113 +1,93 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { TrendingUp, PieChart as PieChartIcon, BarChart3 } from 'lucide-react';
-import { projectId } from '../utils/supabase/info';
+'use client'
 
-interface User {
-  id: string;
-  email: string;
-  user_metadata: {
-    name: string;
-  };
-}
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
+import { TrendingUp, PieChart as PieChartIcon, BarChart3 } from 'lucide-react'
 
 interface Expense {
-  id: string;
-  userId: string;
-  amount: number;
-  category: string;
-  date: string;
-  description: string;
-  createdAt: string;
+  id: string
+  userId: string
+  amount: number
+  category: string
+  date: string
+  description: string
+  createdAt: string
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
 
-interface AnalyticsProps {
-  user: User;
-  accessToken: string;
-}
-
-export function Analytics({ user, accessToken }: AnalyticsProps) {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('all');
+export function AnalyticsView() {
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [loading, setLoading] = useState(true)
+  const [timeRange, setTimeRange] = useState('all')
 
   useEffect(() => {
-    fetchExpenses();
-  }, []);
+    fetchExpenses()
+  }, [])
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-b4e89827/expenses`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setExpenses(data.expenses || []);
-      }
+      // TODO: Replace with /api/expenses call (Step 4)
+      setExpenses([])
     } catch (error) {
-      console.log('Error fetching expenses:', error);
+      console.log('Error fetching expenses:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const getFilteredExpenses = () => {
-    const now = new Date();
-    let startDate: Date;
+    const now = new Date()
+    let startDate: Date
 
     switch (timeRange) {
       case 'month':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        break;
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+        break
       case 'year':
-        startDate = new Date(now.getFullYear(), 0, 1);
-        break;
+        startDate = new Date(now.getFullYear(), 0, 1)
+        break
       default:
-        return expenses;
+        return expenses
     }
 
-    return expenses.filter(expense => new Date(expense.date) >= startDate);
-  };
+    return expenses.filter(expense => new Date(expense.date) >= startDate)
+  }
 
-  const filteredExpenses = getFilteredExpenses();
+  const filteredExpenses = getFilteredExpenses()
 
   const categoryData = filteredExpenses.reduce((acc, expense) => {
-    acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
-    return acc;
-  }, {} as Record<string, number>);
+    acc[expense.category] = (acc[expense.category] || 0) + expense.amount
+    return acc
+  }, {} as Record<string, number>)
 
   const pieChartData = Object.entries(categoryData).map(([category, amount]) => ({
     name: category,
-    value: amount
-  })).sort((a, b) => b.value - a.value);
+    value: amount,
+  })).sort((a, b) => b.value - a.value)
 
   const monthlyData = filteredExpenses.reduce((acc, expense) => {
-    const monthKey = new Date(expense.date).toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short' 
-    });
-    acc[monthKey] = (acc[monthKey] || 0) + expense.amount;
-    return acc;
-  }, {} as Record<string, number>);
+    const monthKey = new Date(expense.date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+    })
+    acc[monthKey] = (acc[monthKey] || 0) + expense.amount
+    return acc
+  }, {} as Record<string, number>)
 
   const barChartData = Object.entries(monthlyData).map(([month, amount]) => ({
     month,
-    amount
-  }));
+    amount,
+  }))
 
-  const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const averageExpense = filteredExpenses.length > 0 ? totalAmount / filteredExpenses.length : 0;
-  const topCategory = pieChartData[0];
+  const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0)
+  const averageExpense = filteredExpenses.length > 0 ? totalAmount / filteredExpenses.length : 0
+  const topCategory = pieChartData[0]
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64">Loading...</div>;
+    return <div className="flex items-center justify-center h-64">Loading...</div>
   }
 
   return (
@@ -142,7 +122,7 @@ export function Analytics({ user, accessToken }: AnalyticsProps) {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm">Average Transaction</CardTitle>
@@ -153,7 +133,7 @@ export function Analytics({ user, accessToken }: AnalyticsProps) {
             <p className="text-xs text-muted-foreground">Per expense</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm">Top Category</CardTitle>
@@ -189,11 +169,11 @@ export function Analytics({ user, accessToken }: AnalyticsProps) {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {pieChartData.map((entry, index) => (
+                      {pieChartData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: any) => [`$${value.toFixed(2)}`, 'Amount']} />
+                    <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -218,7 +198,7 @@ export function Analytics({ user, accessToken }: AnalyticsProps) {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip formatter={(value: any) => [`$${value.toFixed(2)}`, 'Amount']} />
+                    <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']} />
                     <Bar dataKey="amount" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -232,5 +212,5 @@ export function Analytics({ user, accessToken }: AnalyticsProps) {
         </Card>
       </div>
     </div>
-  );
+  )
 }

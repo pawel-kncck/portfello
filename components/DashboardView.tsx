@@ -1,70 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Plus, DollarSign, Calendar, TrendingUp } from 'lucide-react';
-import { projectId } from '../utils/supabase/info';
+'use client'
 
-interface User {
-  id: string;
-  email: string;
-  user_metadata: {
-    name: string;
-  };
-}
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
+import { Button } from './ui/button'
+import { Plus, DollarSign, Calendar, TrendingUp } from 'lucide-react'
 
 interface Expense {
-  id: string;
-  userId: string;
-  amount: number;
-  category: string;
-  date: string;
-  description: string;
-  createdAt: string;
+  id: string
+  userId: string
+  amount: number
+  category: string
+  date: string
+  description: string
+  createdAt: string
 }
 
-interface DashboardProps {
-  user: User;
-  accessToken: string;
-}
-
-export function Dashboard({ user, accessToken }: DashboardProps) {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [loading, setLoading] = useState(true);
+export function DashboardView() {
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchExpenses();
-  }, []);
+    fetchExpenses()
+  }, [])
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-b4e89827/expenses`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setExpenses(data.expenses || []);
-      }
+      // TODO: Replace with /api/expenses call (Step 4)
+      setExpenses([])
     } catch (error) {
-      console.log('Error fetching expenses:', error);
+      console.log('Error fetching expenses:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-  const currentMonth = new Date().toISOString().slice(0, 7);
-  const monthlyExpenses = expenses.filter(exp => exp.date.startsWith(currentMonth));
-  const monthlyTotal = monthlyExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0)
+  const currentMonth = new Date().toISOString().slice(0, 7)
+  const monthlyExpenses = expenses.filter(exp => exp.date.startsWith(currentMonth))
+  const monthlyTotal = monthlyExpenses.reduce((sum, exp) => sum + exp.amount, 0)
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl text-gray-900">
-            Welcome back, {user.user_metadata?.name || 'User'}!
+            Welcome back!
           </h2>
           <p className="text-gray-600 mt-1">
             Track and manage your expenses efficiently
@@ -89,7 +69,7 @@ export function Dashboard({ user, accessToken }: DashboardProps) {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm">Total Expenses</CardTitle>
@@ -102,7 +82,7 @@ export function Dashboard({ user, accessToken }: DashboardProps) {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm">Average</CardTitle>
@@ -141,7 +121,7 @@ export function Dashboard({ user, accessToken }: DashboardProps) {
                       <span className="px-2 py-1 text-xs bg-gray-100 rounded">{expense.category}</span>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">
-                      {new Date(expense.date).toLocaleDateString()} • {expense.description || 'No description'}
+                      {new Date(expense.date).toLocaleDateString()} - {expense.description || 'No description'}
                     </p>
                   </div>
                 </div>
@@ -151,5 +131,5 @@ export function Dashboard({ user, accessToken }: DashboardProps) {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
