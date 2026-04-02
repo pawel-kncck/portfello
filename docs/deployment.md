@@ -110,7 +110,7 @@ Config: `auth.ts`. Proxy: `proxy.ts`.
 Coolify builds and runs the `Dockerfile` from the repo root. The actual Dockerfile:
 
 ```dockerfile
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 
 # --- Dependencies ---
 FROM base AS deps
