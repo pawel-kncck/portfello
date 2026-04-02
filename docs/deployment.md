@@ -101,7 +101,7 @@ Auth.js (NextAuth v5) with:
 - **Prisma adapter** — user/account tables in the app's own database
 - Middleware protects `/dashboard`, `/analytics`, and `/api/expenses/*`
 
-Config: `auth.ts`. Middleware: `middleware.ts`.
+Config: `auth.ts`. Proxy: `proxy.ts`.
 
 ---
 
