@@ -23,7 +23,7 @@ export function AppSidebar() {
               <BarChart3 className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl text-gray-900">ExpenseTracker</h1>
+              <h1 className="text-xl text-gray-900">Portfello</h1>
             </div>
           </div>
         </div>

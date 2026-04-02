@@ -3,7 +3,7 @@ import { Providers } from '@/components/Providers'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
-  title: 'Expense Tracker',
+  title: 'Portfello',
   description: 'Track your expenses and analyze your spending',
 }
 

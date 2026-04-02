@@ -36,7 +36,7 @@ export function LoginForm({ onLogin, onSwitchToSignup }: LoginFormProps) {
       <CardHeader className="text-center">
         <CardTitle>Sign In</CardTitle>
         <CardDescription>
-          Enter your credentials to access your expense tracker
+          Enter your credentials to access Portfello
         </CardDescription>
       </CardHeader>
       <CardContent>
