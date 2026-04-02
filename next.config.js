@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  typescript: {
+    // Type checking runs locally and in CI; skip during Docker build to avoid OOM on 4GB server
+    ignoreBuildErrors: true,
+  },
   serverExternalPackages: ['@prisma/adapter-pg', 'pg', 'bcryptjs'],
   async headers() {
     return [
