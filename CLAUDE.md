@@ -167,10 +167,39 @@ When encountering a critical bug:
 4. **Test incrementally** - Commit working states even during debugging
 5. **Log every attempt** - Failed attempts are valuable information
 
-### 7. Quality Checks Before Each Commit
+### 7. Testing Requirements - MANDATORY
+
+**Every new feature MUST include tests. No feature is complete without tests.**
+
+#### Rules:
+- **Write tests alongside the feature**, not as a separate follow-up task
+- **Every new function, API endpoint, or component** must have at least one test
+- **Run `npm test` before every commit** — all tests must pass
+- **A feature PR/commit without tests is incomplete** — treat it the same as code that doesn't compile
+
+#### What to test:
+- **Unit tests** (`tests/unit/`): validation schemas, utility functions, business logic, rule evaluation
+- **Component tests** (`tests/components/`): React components render correctly, handle user interaction, display errors
+- **API route tests** (`tests/api/`): route handlers return correct status codes, validate input, enforce auth/membership
+
+#### Test tooling:
+- Runner: Vitest (`npm test`, `npm run test:watch`, `npm run test:coverage`)
+- Components: @testing-library/react + user-event
+- Mocking: `vi.mock()` for external dependencies (Prisma, auth, etc.)
+
+#### Test granularity per feature type:
+| Feature type | Minimum tests |
+|---|---|
+| New API endpoint | Input validation, success case, auth/permission check, error case |
+| New component | Renders correctly, user interactions, error states |
+| New utility/lib function | Happy path, edge cases, invalid input |
+| Bug fix | Regression test that reproduces the bug |
+
+### 8. Quality Checks Before Each Commit
 
 - [ ] Code runs without errors
-- [ ] Tests pass (if applicable)
+- [ ] **All tests pass (`npm test`)**
+- [ ] **New code has corresponding tests**
 - [ ] Log entry prepared
 - [ ] Commit message matches the granularity of change
 - [ ] No debugging code left in (console.logs, etc.)
