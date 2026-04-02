@@ -2,10 +2,11 @@
 
 ## Overview
 
-Migrate Portfello from a Vite SPA + Supabase stack to a Next.js + PostgreSQL + Auth.js stack, containerized with Docker, and auto-deployed to Hetzner via GitHub Actions.
+Migrate Portfello from a Vite SPA + Supabase stack to a Next.js + PostgreSQL + Auth.js stack, containerized with Docker, and auto-deployed to Hetzner via Coolify.
 
 **Current stack:** Vite SPA, Supabase Auth, Supabase Edge Functions (Hono/Deno), Supabase KV store
-**Target stack:** Next.js, Auth.js, PostgreSQL, Prisma ORM, Docker, Caddy, GitHub Actions
+**Target stack:** Next.js, Auth.js, PostgreSQL, Prisma ORM, Docker, Coolify (self-hosted PaaS on Hetzner)
+**Domain:** `portfello.lr15a.pl`
 
 ---
 
@@ -164,92 +165,100 @@ Migrate Portfello from a Vite SPA + Supabase stack to a Next.js + PostgreSQL + A
 **Tasks:**
 - [x] Create multi-stage `Dockerfile` (deps → build → production on node:22-alpine)
 - [x] Create `docker-compose.yml` for local dev (app + PostgreSQL 16, port 5433)
-- [x] Create `docker-compose.prod.yml` (app-only, pulls from ghcr.io, uses env vars)
 - [x] Create `.dockerignore`
 - [x] `output: 'standalone'` already set in `next.config.js` (Step 1)
 - [x] Add `serverExternalPackages` for Prisma adapter, pg, and bcryptjs
 - [x] Verify standalone build includes all runtime deps
+- [x] Update Dockerfile CMD to run Prisma migrations at startup: `CMD ["sh", "-c", "prisma migrate deploy && node server.js"]`
+- [x] Ensure `prisma` CLI is available in the production image (`npm install -g prisma` in runner stage)
+- [x] Remove `docker-compose.prod.yml` (not needed with Coolify)
 - [ ] Live `docker compose up` test (Docker daemon was not running — verify manually)
 
 **Files created:**
-- `Dockerfile` — 3-stage build, copies standalone + Prisma generated client
+- `Dockerfile` — 3-stage build, copies standalone + Prisma generated client, runs migrations at startup
 - `docker-compose.yml` — local dev with PostgreSQL 16
-- `docker-compose.prod.yml` — production, pulls image from ghcr.io
 - `.dockerignore`
 - `public/` — empty directory (required by Next.js/Dockerfile)
+
+**Files removed:**
+- `docker-compose.prod.yml` — not needed; Coolify builds and runs from the Dockerfile directly
 
 **Notes:**
 - `serverExternalPackages` in next.config.js ensures `@prisma/adapter-pg`, `pg`, and `bcryptjs` are traced into the standalone output (not bundled away)
 - Production image runs as non-root `nextjs` user
 - docker-compose.yml exposes PostgreSQL on port 5433 to avoid conflicts with local installs
+- `docker-compose.prod.yml` was created for a self-managed deployment but is unnecessary with Coolify — Coolify builds from the Dockerfile and manages the container lifecycle itself
 
 ---
 
-## Step 6: Add GitHub Actions CI/CD
+## Step 6: Deployment Readiness
 
-**Goal:** Auto-deploy to Hetzner on push to `main`.
+**Goal:** Prepare the app for deployment on the lr15a.pl platform (Coolify on Hetzner).
+
+**Status: COMPLETED** (commit pending)
 
 **Tasks:**
-- [ ] Create `.github/workflows/deploy.yml`:
-  1. Build Docker image
-  2. Push to GitHub Container Registry (`ghcr.io`)
-  3. SSH into Hetzner app server
-  4. Pull new image and restart container via `docker compose up -d`
-- [ ] Add required GitHub repository secrets:
-  - `HETZNER_SSH_KEY` — private key for SSH access to app server
-  - `HETZNER_HOST` — app server IP or hostname
-  - `HETZNER_USER` — SSH user on app server
-  - `DATABASE_URL` — connection string to DB server over private network
-  - `AUTH_SECRET` — Auth.js secret
-- [ ] Add health check endpoint (`GET /api/health`) for post-deploy verification
-- [ ] Test full pipeline: push → build → deploy → verify
+- [x] Add security headers to `next.config.js` (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
+- [x] Add health check endpoint (`GET /api/health`) for post-deploy verification
+- [x] Update `.env.example` with empty placeholders for all required variables
+- [x] Verify `package-lock.json` is committed (required by Coolify/Nixpacks)
+- [x] Verify app listens on `0.0.0.0` (already set via `ENV HOSTNAME="0.0.0.0"` in Dockerfile)
+- [x] Run `npm audit fix` — 0 vulnerabilities remaining
+- [x] `npm run build` passes cleanly
 
-**Workflow outline:**
-```yaml
-on:
-  push:
-    branches: [main]
+**Files created:**
+- `app/api/health/route.ts` — returns `{ status: "ok" }`
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - Checkout
-      - Log in to ghcr.io
-      - Build and push Docker image
-      - SSH to Hetzner and pull/restart
-      - Verify health check
-```
+**Files modified:**
+- `next.config.js` — added `headers()` with security headers
+- `.env.example` — replaced sample values with empty placeholders
+
+**Pre-deploy checklist:**
+- [x] `npm ci && npm run build` succeeds locally with no errors
+- [x] `package-lock.json` is committed
+- [ ] No secrets in the codebase (`git log -p | grep -i secret`)
+- [x] Dockerfile uses non-root user (`nextjs`)
+- [x] `.env.example` exists with empty placeholders
+- [x] Security headers configured in `next.config.js`
+- [x] `npm audit` shows no critical vulnerabilities
 
 ---
 
-## Step 7: Caddy Configuration on Hetzner
+## Step 7: Deploy to Coolify (Platform Admin)
 
-**Goal:** Route traffic from a subdomain to the Portfello container.
+**Goal:** Deploy the app to `portfello.lr15a.pl` via Coolify.
 
-**Tasks:**
-- [ ] Choose subdomain (e.g., `portfello.yourdomain.com`)
-- [ ] Add DNS A record pointing to the Hetzner app server IP
-- [ ] Add entry to the existing Caddyfile on the app server:
-  ```
-  portfello.yourdomain.com {
-      reverse_proxy portfello-app:3000
-  }
-  ```
-- [ ] Reload Caddy to pick up the new config
-- [ ] Verify HTTPS works (Caddy auto-provisions Let's Encrypt cert)
+Coolify handles building, running, SSL (Let's Encrypt), and routing automatically.
+DNS is covered by the `*.lr15a.pl` wildcard — no action needed.
+
+**Tasks (done by platform admin):**
+- [ ] Create database on the DB server using the provisioning script
+- [ ] Add app in Coolify: Projects → Add Resource → select `portfello` repo → set domain to `portfello.lr15a.pl`
+- [ ] Set environment variables in Coolify dashboard:
+  - `DATABASE_URL` — provided by platform admin after database creation
+  - `AUTH_SECRET` — generated unique secret (32+ random bytes)
+  - `AUTH_URL` — the app's public URL
+- [ ] Deploy: push to `main` or trigger manually in Coolify
+- [ ] Verify health check: `curl https://portfello.lr15a.pl/api/health`
+- [ ] Verify HTTPS works (auto-provisioned by Coolify via Let's Encrypt)
+
+**Notes:**
+- No GitHub Actions CI/CD pipeline needed — Coolify auto-deploys on push to `main` via GitHub webhook
+- No manual Caddy/reverse-proxy configuration needed — Coolify handles routing
+- No ghcr.io push needed — Coolify builds the Dockerfile on the server itself
+- Subsequent pushes to `main` auto-deploy
 
 ---
 
 ## Updated .env.example (Post-Migration)
 
 ```env
-# Database (PostgreSQL on Hetzner DB server)
-DATABASE_URL=postgresql://portfello_user:password@db-private-ip:5432/portfello_db
+# Database (PostgreSQL on Hetzner DB server, private network, SSL required)
+DATABASE_URL=
 
 # Auth.js
-AUTH_SECRET=generate-with-openssl-rand-base64-32
-AUTH_URL=https://portfello.yourdomain.com
+AUTH_SECRET=
+AUTH_URL=
 
 # Optional: OAuth providers (add later)
 # AUTH_GOOGLE_ID=
@@ -257,6 +266,8 @@ AUTH_URL=https://portfello.yourdomain.com
 # AUTH_GITHUB_ID=
 # AUTH_GITHUB_SECRET=
 ```
+
+**Note:** These values are set in the Coolify dashboard per app — never committed to the repo. The `.env.example` file uses empty/placeholder values for documentation only.
 
 ---
 
@@ -274,5 +285,6 @@ AUTH_URL=https://portfello.yourdomain.com
 
 - [ ] Remove `supabase/` directory (done in Step 4)
 - [ ] Remove `@supabase/supabase-js` from `package.json` (done in Step 4)
+- [x] Remove `docker-compose.prod.yml` (done in Step 5)
 - [ ] Remove Figma-specific component (`components/figma/ImageWithFallback.tsx`) if unused
 - [ ] Audit `package.json` for unused dependencies
