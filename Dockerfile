@@ -6,8 +6,6 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-COPY prisma ./prisma/
-COPY prisma.config.ts ./
 RUN npm install
 
 # --- Build ---
@@ -17,7 +15,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN npx prisma generate
 RUN npm run build
 
 # --- Production ---
@@ -32,12 +29,8 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Full node_modules for prisma CLI (overlays standalone's minimal node_modules)
+COPY --from=builder /app/drizzle ./drizzle
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/generated ./generated
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 USER nextjs
 
@@ -46,4 +39,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+CMD ["sh", "-c", "npx drizzle-kit migrate && node server.js"]

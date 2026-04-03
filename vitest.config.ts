@@ -11,7 +11,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['app/**', 'components/**', 'lib/**'],
-      exclude: ['**/*.test.*', 'generated/**'],
+      exclude: ['**/*.test.*'],
     },
   },
   resolve: {
