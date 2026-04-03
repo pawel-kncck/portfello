@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
-import { expenses } from '@/lib/schema'
+import { expenses, walletMembers } from '@/lib/schema'
 
 const expenseSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
@@ -12,10 +12,11 @@ const expenseSchema = z.object({
   description: z.string().max(500).optional(),
 })
 
-function serializeExpense(e: { id: string; amount: string; category: string; date: Date | string; description: string | null; createdAt: Date; updatedAt: Date | null }) {
+function serializeExpense(e: { id: string; walletId: string | null; amount: string; category: string; date: Date | string; description: string | null; createdAt: Date; updatedAt: Date | null }) {
   const dateValue = e.date instanceof Date ? e.date : new Date(e.date)
   return {
     id: e.id,
+    walletId: e.walletId,
     amount: Number(e.amount),
     category: e.category,
     date: dateValue.toISOString().split('T')[0],
@@ -23,6 +24,29 @@ function serializeExpense(e: { id: string; amount: string; category: string; dat
     createdAt: e.createdAt,
     updatedAt: e.updatedAt,
   }
+}
+
+async function checkExpenseAccess(expenseId: string, userId: string) {
+  const expense = await db.query.expenses.findFirst({
+    where: eq(expenses.id, expenseId),
+  })
+  if (!expense) return null
+
+  // If expense has a wallet, check membership
+  if (expense.walletId) {
+    const membership = await db.query.walletMembers.findFirst({
+      where: and(
+        eq(walletMembers.walletId, expense.walletId),
+        eq(walletMembers.userId, userId),
+      ),
+    })
+    if (!membership) return null
+  } else {
+    // Legacy: no wallet, check userId directly
+    if (expense.userId !== userId) return null
+  }
+
+  return expense
 }
 
 export async function PUT(
@@ -36,9 +60,7 @@ export async function PUT(
 
   const { id } = await params
 
-  const existing = await db.query.expenses.findFirst({
-    where: and(eq(expenses.id, id), eq(expenses.userId, session.user.id)),
-  })
+  const existing = await checkExpenseAccess(id, session.user.id)
   if (!existing) {
     return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
   }
@@ -73,9 +95,7 @@ export async function DELETE(
 
   const { id } = await params
 
-  const existing = await db.query.expenses.findFirst({
-    where: and(eq(expenses.id, id), eq(expenses.userId, session.user.id)),
-  })
+  const existing = await checkExpenseAccess(id, session.user.id)
   if (!existing) {
     return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
   }
