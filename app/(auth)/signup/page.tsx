@@ -8,8 +8,8 @@ import { signup } from './action'
 export default function SignupPage() {
   const router = useRouter()
 
-  const handleSignup = async (email: string, password: string, name: string) => {
-    const result = await signup(email, password, name)
+  const handleSignup = async (email: string, password: string) => {
+    const result = await signup(email, password)
 
     if (!result.success) {
       return { success: false, error: result.error }

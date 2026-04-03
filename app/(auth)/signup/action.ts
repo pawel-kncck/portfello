@@ -9,7 +9,6 @@ import { users } from '@/lib/schema'
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  name: z.string().min(1, 'Name is required').max(100),
 })
 
 interface SignupResult {
@@ -17,8 +16,8 @@ interface SignupResult {
   error?: string
 }
 
-export async function signup(email: string, password: string, name: string): Promise<SignupResult> {
-  const parsed = signupSchema.safeParse({ email, password, name })
+export async function signup(email: string, password: string): Promise<SignupResult> {
+  const parsed = signupSchema.safeParse({ email, password })
   if (!parsed.success) {
     return { success: false, error: parsed.error.errors[0].message }
   }
@@ -35,7 +34,6 @@ export async function signup(email: string, password: string, name: string): Pro
 
     await db.insert(users).values({
       email: parsed.data.email,
-      name: parsed.data.name,
       passwordHash,
     })
 
