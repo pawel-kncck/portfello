@@ -84,16 +84,16 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl text-gray-900">
+          <h2 className="text-2xl sm:text-3xl text-gray-900">
             Welcome back!
           </h2>
-          <p className="text-gray-600 mt-1">
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
             Track and manage your expenses efficiently
           </p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowAddModal(true)}>
+        <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto" onClick={() => setShowAddModal(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Expense
         </Button>
@@ -157,17 +157,17 @@ export function DashboardView() {
           ) : (
             <div className="space-y-4">
               {expenses.slice(0, 10).map((expense) => (
-                <div key={expense.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <div className="flex items-center space-x-2">
+                <div key={expense.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2 flex-wrap">
                       <span className="font-medium">${expense.amount.toFixed(2)}</span>
                       <span className="px-2 py-1 text-xs bg-gray-100 rounded">{expense.category}</span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 mt-1 truncate">
                       {new Date(expense.date).toLocaleDateString()} - {expense.description || 'No description'}
                     </p>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 self-end sm:self-center">
                     <Button variant="ghost" size="sm" onClick={() => setEditingExpense(expense)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
