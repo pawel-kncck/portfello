@@ -10,6 +10,8 @@ import {
   index,
   primaryKey,
   pgEnum,
+  boolean,
+  jsonb,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
@@ -99,6 +101,59 @@ export const expenses = pgTable('expenses', {
   index('expenses_date_idx').on(table.date),
 ])
 
+// ─── Categories ───
+
+export const categories = pgTable('categories', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  walletId: text('walletId').notNull().references(() => wallets.id, { onDelete: 'cascade' }),
+  parentId: text('parentId'),
+  name: varchar('name', { length: 100 }).notNull(),
+  color: varchar('color', { length: 7 }).notNull().default('#6B7280'),
+  sortOrder: integer('sortOrder').notNull().default(0),
+  createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex('categories_walletId_parentId_name_key').on(table.walletId, table.parentId, table.name),
+  index('categories_walletId_idx').on(table.walletId),
+])
+
+// ─── Tags ───
+
+export const tags = pgTable('tags', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  walletId: text('walletId').notNull().references(() => wallets.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 50 }).notNull(),
+  createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex('tags_walletId_name_key').on(table.walletId, table.name),
+  index('tags_walletId_idx').on(table.walletId),
+])
+
+// ─── Expense Tags (join table) ───
+
+export const expenseTags = pgTable('expense_tags', {
+  expenseId: text('expenseId').notNull().references(() => expenses.id, { onDelete: 'cascade' }),
+  tagId: text('tagId').notNull().references(() => tags.id, { onDelete: 'cascade' }),
+}, (table) => [
+  primaryKey({ columns: [table.expenseId, table.tagId] }),
+])
+
+// ─── Categorization Rules ───
+
+export const rules = pgTable('rules', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  walletId: text('walletId').notNull().references(() => wallets.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 200 }).notNull(),
+  priority: integer('priority').notNull().default(0),
+  conditions: jsonb('conditions').notNull().$type<Record<string, unknown>>(),
+  actions: jsonb('actions').notNull().$type<Record<string, unknown>>(),
+  enabled: boolean('enabled').notNull().default(true),
+  createdById: text('createdById').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).notNull().defaultNow(),
+}, (table) => [
+  index('rules_walletId_idx').on(table.walletId),
+  index('rules_walletId_priority_idx').on(table.walletId, table.priority),
+])
+
 // ─── Relations ───
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -119,6 +174,9 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 export const walletsRelations = relations(wallets, ({ many }) => ({
   members: many(walletMembers),
   expenses: many(expenses),
+  categories: many(categories),
+  tags: many(tags),
+  rules: many(rules),
 }))
 
 export const walletMembersRelations = relations(walletMembers, ({ one }) => ({
@@ -126,7 +184,29 @@ export const walletMembersRelations = relations(walletMembers, ({ one }) => ({
   user: one(users, { fields: [walletMembers.userId], references: [users.id] }),
 }))
 
-export const expensesRelations = relations(expenses, ({ one }) => ({
+export const expensesRelations = relations(expenses, ({ one, many }) => ({
   user: one(users, { fields: [expenses.userId], references: [users.id] }),
   wallet: one(wallets, { fields: [expenses.walletId], references: [wallets.id] }),
+  expenseTags: many(expenseTags),
+}))
+
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
+  wallet: one(wallets, { fields: [categories.walletId], references: [wallets.id] }),
+  parent: one(categories, { fields: [categories.parentId], references: [categories.id], relationName: 'parentChild' }),
+  children: many(categories, { relationName: 'parentChild' }),
+}))
+
+export const tagsRelations = relations(tags, ({ one, many }) => ({
+  wallet: one(wallets, { fields: [tags.walletId], references: [wallets.id] }),
+  expenseTags: many(expenseTags),
+}))
+
+export const expenseTagsRelations = relations(expenseTags, ({ one }) => ({
+  expense: one(expenses, { fields: [expenseTags.expenseId], references: [expenses.id] }),
+  tag: one(tags, { fields: [expenseTags.tagId], references: [tags.id] }),
+}))
+
+export const rulesRelations = relations(rules, ({ one }) => ({
+  wallet: one(wallets, { fields: [rules.walletId], references: [wallets.id] }),
+  createdBy: one(users, { fields: [rules.createdById], references: [users.id] }),
 }))

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
-import { BarChart3, Home, LogOut, Menu, Settings, User, X, Wallet, ChevronDown, Plus } from 'lucide-react'
+import { BarChart3, Home, LogOut, Menu, Settings, User, X, Wallet, ChevronDown, Plus, Tags } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 import { useI18n } from '@/lib/i18n/context'
 import { useWallet } from '@/lib/wallet/context'
@@ -210,6 +210,17 @@ export function AppSidebar() {
           <Link href="/analytics">
             <BarChart3 className="mr-3 h-4 w-4" />
             {t.nav.analytics}
+          </Link>
+        </Button>
+
+        <Button
+          variant={pathname === '/wallet-settings' ? 'default' : 'ghost'}
+          className="w-full justify-start"
+          asChild
+        >
+          <Link href="/wallet-settings">
+            <Tags className="mr-3 h-4 w-4" />
+            {t.nav.walletSettings}
           </Link>
         </Button>
 

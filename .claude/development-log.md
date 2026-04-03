@@ -408,3 +408,90 @@ Started: 2026-04-02
 - Schema: create wallet, invite member, expense-with-wallet validation
 
 ---
+
+## Session: 2026-04-03 22:15
+
+### Todo List:
+- [x] Add categories, tags, rules, and expenseTags tables to Drizzle schema
+- [x] Generate database migration for new tables
+- [x] Create categories API endpoints (CRUD under /api/wallets/[id]/categories)
+- [x] Create tags API endpoints (CRUD under /api/wallets/[id]/tags)
+- [x] Create rules API endpoints (CRUD + reorder under /api/wallets/[id]/rules)
+- [x] Implement rule evaluation engine (lib/rules/engine.ts)
+- [x] Add i18n translations for categories, tags, and rules
+- [x] Create categories management UI component
+- [x] Create tags management UI component
+- [x] Create rules management UI component
+- [x] Add wallet settings page with tabs for categories, tags, rules
+- [x] Write tests for schema validation, rule engine, and components
+- [x] Update development log and push
+
+### Changes:
+
+#### 22:15 - Add categories, tags, expense_tags, and rules tables to Drizzle schema
+**Commit**: `4352cb0` - `feat(db): add categories, tags, expense_tags, and rules tables`
+**Files Modified**: 
+- `lib/schema.ts` - Added 4 new tables (categories, tags, expense_tags, rules) with relations
+
+**Files Created**:
+- `drizzle/0003_flat_bushwacker.sql` - Migration for new tables
+
+**Details**:
+- categories: hierarchical (self-referential parentId), per-wallet, with color and sortOrder
+- tags: flat, per-wallet, unique name per wallet
+- expense_tags: join table linking expenses to tags (composite PK)
+- rules: JSON-based categorization rules with priority ordering, enabled toggle
+- All tables cascade on wallet/user deletion
+
+#### 22:18 - Create CRUD API endpoints for categories, tags, and rules
+**Commit**: `0463755` - `feat(api): add CRUD endpoints for categories, tags, and rules`
+**Files Created**: 
+- `lib/wallet/membership.ts` - Shared wallet membership check helper
+- `lib/rules/engine.ts` - Rule evaluation engine with Zod schemas
+- `app/api/wallets/[id]/categories/route.ts` - GET (tree + flat), POST
+- `app/api/wallets/[id]/categories/[catId]/route.ts` - PUT, DELETE (with reparenting)
+- `app/api/wallets/[id]/tags/route.ts` - GET, POST
+- `app/api/wallets/[id]/tags/[tagId]/route.ts` - PUT, DELETE
+- `app/api/wallets/[id]/rules/route.ts` - GET, POST
+- `app/api/wallets/[id]/rules/[ruleId]/route.ts` - PUT, DELETE
+- `app/api/wallets/[id]/rules/reorder/route.ts` - PUT (bulk priority update)
+
+**Details**:
+- Categories: tree-building in GET response, parent validation, uniqueness per level
+- Tags: simple CRUD, cascade delete removes from expense_tags
+- Rules: Zod-validated conditions/actions, ordered by priority
+- Rule engine: description (contains, regex, startsWith, endsWith), amount (equals, gt, gte, lt, lte, between), direction, bankAccount, date (dayOfWeek, between) conditions
+- Rule actions: set category, add tags, set type (expense/income/cost_reduction)
+- First match wins for category/type, all matches accumulate for tags
+
+#### 22:20 - Add i18n translations
+**Commit**: `ffd7daf` - `feat(i18n): add translations for category, tag, and rule management`
+**Files Modified**: 
+- `lib/i18n/en.ts` - Added categoryManagement, tagManagement, ruleManagement, walletSettings sections + nav.walletSettings
+- `lib/i18n/pl.ts` - Same sections in Polish
+
+#### 22:25 - Create UI components and wallet settings page
+**Commit**: `a54db86` - `feat(ui): add wallet settings page with category, tag, and rule management`
+**Files Created**: 
+- `components/CategoryManager.tsx` - Hierarchical tree view with expand/collapse, CRUD, color picker, parent selection
+- `components/TagManager.tsx` - Inline create/edit with badge display, delete with confirmation
+- `components/RuleManager.tsx` - Simplified form + JSON editor, enable/disable toggle, condition/action descriptions
+- `components/WalletSettingsView.tsx` - Tabbed container (categories, tags, rules)
+- `app/(app)/wallet-settings/page.tsx` - Route page
+
+**Files Modified**:
+- `components/AppSidebar.tsx` - Added Wallet Settings nav link with Tags icon
+
+#### 22:36 - Write comprehensive tests
+**Commit**: `4c639c0` - `test(categories-tags-rules): add comprehensive tests for rule engine, schemas, and UI`
+**Files Created**: 
+- `tests/unit/rule-engine.test.ts` - 30 tests for conditions, actions, and evaluation
+- `tests/unit/category-tag-schemas.test.ts` - 18 tests for create/update validation
+- `tests/components/WalletSettingsView.test.tsx` - 10 tests for tabs and empty states
+
+**Details**:
+- All 124 tests passing (68 new + 56 existing)
+- Rule engine tests cover: all condition types, AND logic, priority ordering, tag accumulation, disabled rules, null handling, invalid regex
+- Schema tests cover: name validation, color format, sortOrder constraints
+
+---
