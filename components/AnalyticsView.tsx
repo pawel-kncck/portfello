@@ -95,13 +95,13 @@ export function AnalyticsView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl text-gray-900">Analytics</h2>
-          <p className="text-gray-600 mt-1">Analyze your spending patterns</p>
+          <h2 className="text-2xl sm:text-3xl text-gray-900">Analytics</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Analyze your spending patterns</p>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -159,7 +159,7 @@ export function AnalyticsView() {
           </CardHeader>
           <CardContent>
             {pieChartData.length > 0 ? (
-              <div className="h-80">
+              <div className="h-64 sm:h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -168,7 +168,7 @@ export function AnalyticsView() {
                       cy="50%"
                       labelLine={false}
                       label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
+                      outerRadius={70}
                       fill="#8884d8"
                       dataKey="value"
                     >
@@ -181,7 +181,7 @@ export function AnalyticsView() {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-80 flex items-center justify-center text-gray-500">
+              <div className="h-64 sm:h-80 flex items-center justify-center text-gray-500">
                 No expense data available
               </div>
             )}
@@ -195,7 +195,7 @@ export function AnalyticsView() {
           </CardHeader>
           <CardContent>
             {barChartData.length > 0 ? (
-              <div className="h-80">
+              <div className="h-64 sm:h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={barChartData}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -207,7 +207,7 @@ export function AnalyticsView() {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-80 flex items-center justify-center text-gray-500">
+              <div className="h-64 sm:h-80 flex items-center justify-center text-gray-500">
                 No expense data available
               </div>
             )}
