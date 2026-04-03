@@ -1,0 +1,133 @@
+export const en = {
+  // Common
+  common: {
+    loading: 'Loading...',
+    cancel: 'Cancel',
+    save: 'Save',
+    delete: 'Delete',
+    edit: 'Edit',
+    noDescription: 'No description',
+    transactions: 'transactions',
+    totalTransactions: 'total transactions',
+    perTransaction: 'Per transaction',
+    perExpense: 'Per expense',
+    noData: 'N/A',
+    amount: 'Amount',
+    total: 'Total:',
+  },
+
+  // Navigation
+  nav: {
+    dashboard: 'Dashboard',
+    analytics: 'Analytics',
+    settings: 'Settings',
+    logout: 'Logout',
+  },
+
+  // Dashboard
+  dashboard: {
+    welcomeBack: 'Welcome back!',
+    trackExpenses: 'Track and manage your expenses efficiently',
+    addExpense: 'Add Expense',
+    thisMonth: 'This Month',
+    totalExpenses: 'Total Expenses',
+    average: 'Average',
+    recentExpenses: 'Recent Expenses',
+    noExpensesYet: 'No expenses yet',
+  },
+
+  // Analytics
+  analytics: {
+    title: 'Analytics',
+    subtitle: 'Analyze your spending patterns',
+    allTime: 'All Time',
+    thisYear: 'This Year',
+    thisMonth: 'This Month',
+    totalSpent: 'Total Spent',
+    averageTransaction: 'Average Transaction',
+    topCategory: 'Top Category',
+    spendingByCategory: 'Spending by Category',
+    categoryBreakdown: 'Breakdown of expenses by category',
+    monthlyTrends: 'Monthly Trends',
+    totalByMonth: 'Total expenses by month',
+    noExpenseData: 'No expense data available',
+  },
+
+  // Expenses
+  expenses: {
+    addNew: 'Add New Expense',
+    addDescription: 'Enter the details for your new expense entry.',
+    editExpense: 'Edit Expense',
+    editDescription: 'Update the details for this expense entry.',
+    amount: 'Amount *',
+    category: 'Category *',
+    selectCategory: 'Select a category',
+    date: 'Date',
+    description: 'Description',
+    optionalDescription: 'Optional description...',
+    adding: 'Adding...',
+    addExpense: 'Add Expense',
+    updating: 'Updating...',
+    updateExpense: 'Update Expense',
+    deleteConfirm: 'Are you sure you want to delete this expense?',
+    noExpensesYet: 'No expenses yet',
+    getStarted: 'Get started by adding your first expense.',
+    amountRequired: 'Amount and category are required',
+    invalidAmount: 'Please enter a valid amount',
+    addFailed: 'Failed to add expense',
+    updateFailed: 'Failed to update expense',
+  },
+
+  // Categories
+  categories: {
+    Food: 'Food',
+    Transport: 'Transport',
+    Utilities: 'Utilities',
+    Entertainment: 'Entertainment',
+    Healthcare: 'Healthcare',
+    Shopping: 'Shopping',
+    Other: 'Other',
+  },
+
+  // Auth
+  auth: {
+    signIn: 'Sign In',
+    signInDescription: 'Enter your credentials to access Portfello',
+    email: 'Email',
+    emailPlaceholder: 'Enter your email',
+    password: 'Password',
+    passwordPlaceholder: 'Enter your password',
+    signingIn: 'Signing In...',
+    loginFailed: 'Login failed',
+    noAccount: "Don't have an account?",
+    signUp: 'Sign up',
+    createAccount: 'Create Account',
+    createAccountDescription: 'Sign up to start tracking your expenses',
+    confirmPassword: 'Confirm Password',
+    confirmPasswordPlaceholder: 'Confirm your password',
+    creatingAccount: 'Creating Account...',
+    signupFailed: 'Signup failed',
+    hasAccount: 'Already have an account?',
+    passwordsMismatch: 'Passwords do not match',
+    passwordTooShort: 'Password must be at least 6 characters',
+    invalidCredentials: 'Invalid email or password',
+    accountCreatedLoginFailed: 'Account created but login failed. Please sign in manually.',
+  },
+
+  // Settings
+  settings: {
+    title: 'Settings',
+    subtitle: 'Manage your application preferences',
+    language: 'Language',
+    languageDescription: 'Choose your preferred interface language',
+    currency: 'Currency',
+    currencyDescription: 'Choose the default currency for display',
+    polish: 'Polski',
+    english: 'English',
+    pln: 'PLN (Polish Zloty)',
+    usd: 'USD (US Dollar)',
+    saving: 'Saving...',
+    saved: 'Settings saved',
+    saveFailed: 'Failed to save settings',
+  },
+} as const
