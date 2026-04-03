@@ -91,38 +91,38 @@ export function ExpenseList({ expenses, loading, onUpdate, onDelete }: ExpenseLi
         
         return (
           <div key={month} className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <h3 className="text-lg text-gray-900">{month}</h3>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center space-x-2 min-w-0">
+                <Calendar className="h-4 w-4 text-gray-500 shrink-0" />
+                <h3 className="text-base sm:text-lg text-gray-900 truncate">{month}</h3>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500">Total:</span>
-                <span className="text-lg text-gray-900">${monthTotal.toFixed(2)}</span>
+              <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
+                <span className="text-xs sm:text-sm text-gray-500">Total:</span>
+                <span className="text-base sm:text-lg text-gray-900">${monthTotal.toFixed(2)}</span>
               </div>
             </div>
             
             <div className="space-y-2">
               {monthExpenses.map((expense) => (
-                <div key={expense.id} className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
+                <div key={expense.id} className="bg-gray-50 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap gap-y-1">
                       <Badge className={getCategoryColor(expense.category)}>
                         {expense.category}
                       </Badge>
-                      <span className="text-lg text-gray-900">
+                      <span className="text-base sm:text-lg text-gray-900">
                         ${expense.amount.toFixed(2)}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-xs sm:text-sm text-gray-500">
                         {new Date(expense.date).toLocaleDateString()}
                       </span>
                     </div>
                     {expense.description && (
-                      <p className="mt-1 text-sm text-gray-600">{expense.description}</p>
+                      <p className="mt-1 text-sm text-gray-600 truncate">{expense.description}</p>
                     )}
                   </div>
-                  
-                  <div className="flex items-center space-x-2">
+
+                  <div className="flex items-center space-x-2 self-end sm:self-center">
                     <Button
                       variant="ghost"
                       size="sm"
