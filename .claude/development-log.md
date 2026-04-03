@@ -132,3 +132,80 @@ Started: 2026-04-02
 - New migration creates all 5 tables (users, accounts, sessions, verification_tokens, expenses) with proper columns, constraints, foreign keys, and indexes
 
 ---
+
+## Session: 2026-04-03 19:30
+
+### Todo List:
+- [x] Create collapsible mobile sidebar with hamburger menu toggle
+- [x] Update app layout for responsive sidebar margin
+- [x] Optimize DashboardView header and expense list for mobile
+- [x] Optimize AnalyticsView header and charts for mobile
+- [x] Optimize ExpenseList item layout for mobile
+- [x] Add mobile-friendly touch targets and spacing
+- [x] Write tests for mobile UI components
+
+### Changes:
+
+#### 19:35 - Add collapsible mobile sidebar with hamburger toggle
+**Commit**: `781a49f` - `feat(sidebar): add collapsible mobile sidebar with hamburger toggle`
+**Files Modified**: 
+- `components/AppSidebar.tsx` - Complete rewrite for mobile-responsive sidebar
+- `app/(app)/layout.tsx` - Responsive margin (ml-0 md:ml-64) and mobile top padding
+
+**Details**:
+- Sidebar hidden on mobile (<768px), slides in from left via CSS translate
+- Hamburger menu button fixed in top-left corner on mobile
+- Backdrop overlay with blur effect closes sidebar on tap
+- Escape key and route changes auto-close sidebar
+- Body scroll locked when mobile sidebar is open
+- Desktop behavior unchanged (always visible fixed sidebar)
+
+#### 19:38 - Optimize DashboardView for mobile
+**Commit**: `2a6b852` - `feat(dashboard): optimize DashboardView for mobile screens`
+**Files Modified**: 
+- `components/DashboardView.tsx` - Responsive header, button, and expense list items
+
+**Details**:
+- Header stacks vertically on mobile (flex-col), inline on sm+
+- Add Expense button full-width on mobile
+- Expense list items stack vertically with proper truncation
+- Responsive text sizes (text-2xl sm:text-3xl)
+
+#### 19:40 - Optimize AnalyticsView for mobile
+**Commit**: `825136b` - `feat(analytics): optimize AnalyticsView for mobile screens`
+**Files Modified**: 
+- `components/AnalyticsView.tsx` - Responsive header, select, and chart heights
+
+**Details**:
+- Header stacks vertically on mobile
+- Time range select full-width on mobile
+- Chart heights reduced on mobile (h-64 vs h-80)
+- Smaller pie chart radius for better fit
+
+#### 19:41 - Optimize ExpenseList for mobile
+**Commit**: `b0e681e` - `feat(expenses): optimize ExpenseList layout for mobile screens`
+**Files Modified**: 
+- `components/ExpenseList.tsx` - Responsive expense items and month headers
+
+**Details**:
+- Expense items stack vertically on mobile, inline on sm+
+- Flex-wrap on badge/amount/date row
+- Responsive text sizes and spacing
+
+#### 19:42 - Add touch-friendly targets and viewport config
+**Commit**: `5c43af6` - `feat(mobile): add touch-friendly targets, viewport config, and dialog improvements`
+**Files Modified**: 
+- `app/layout.tsx` - Added viewport export with maximum-scale=1
+- `styles/globals.css` - Min 44px touch targets, 16px input font on mobile
+- `components/ui/dialog.tsx` - Scrollable content with max-h-90vh
+
+#### 19:43 - Add tests for mobile sidebar
+**Commit**: `b98aa19` - `test(sidebar): add tests for mobile sidebar toggle behavior`
+**Files Created**: 
+- `tests/components/AppSidebar.test.tsx` - 10 tests for sidebar mobile behavior
+
+**Details**:
+- Tests: rendering, toggle open/close, backdrop dismiss, escape key, close button, body scroll lock, user info display
+- All 19 tests passing (10 new + 9 existing)
+
+---
