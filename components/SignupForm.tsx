@@ -5,6 +5,7 @@ import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription } from './ui/alert';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useI18n } from '@/lib/i18n/context';
 
 interface SignupFormProps {
   onSignup: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -19,6 +20,7 @@ export function SignupForm({ onSignup, onSwitchToLogin }: SignupFormProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useI18n();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,32 +28,32 @@ export function SignupForm({ onSignup, onSwitchToLogin }: SignupFormProps) {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t.auth.passwordsMismatch);
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(t.auth.passwordTooShort);
       setLoading(false);
       return;
     }
 
     const result = await onSignup(email, password);
-    
+
     if (!result.success) {
-      setError(result.error || 'Signup failed');
+      setError(result.error || t.auth.signupFailed);
     }
-    
+
     setLoading(false);
   };
 
   return (
     <Card className="w-full">
       <CardHeader className="text-center">
-        <CardTitle>Create Account</CardTitle>
+        <CardTitle>{t.auth.createAccount}</CardTitle>
         <CardDescription>
-          Sign up to start tracking your expenses
+          {t.auth.createAccountDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -61,28 +63,28 @@ export function SignupForm({ onSignup, onSwitchToLogin }: SignupFormProps) {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t.auth.email}</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder={t.auth.emailPlaceholder}
               required
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t.auth.password}</Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder={t.auth.passwordPlaceholder}
                 required
               />
               <button
@@ -97,14 +99,14 @@ export function SignupForm({ onSignup, onSwitchToLogin }: SignupFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">{t.auth.confirmPassword}</Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm your password"
+                placeholder={t.auth.confirmPasswordPlaceholder}
                 required
               />
               <button
@@ -117,7 +119,7 @@ export function SignupForm({ onSignup, onSwitchToLogin }: SignupFormProps) {
               </button>
             </div>
           </div>
-          
+
           <Button
             type="submit"
             className="w-full"
@@ -126,23 +128,23 @@ export function SignupForm({ onSignup, onSwitchToLogin }: SignupFormProps) {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating Account...
+                {t.auth.creatingAccount}
               </>
             ) : (
-              'Create Account'
+              t.auth.createAccount
             )}
           </Button>
         </form>
-        
+
         <div className="mt-6 text-center">
           <p className="text-gray-600">
-            Already have an account?{' '}
+            {t.auth.hasAccount}{' '}
             <button
               type="button"
               onClick={onSwitchToLogin}
               className="text-blue-600 hover:text-blue-500 underline"
             >
-              Sign in
+              {t.auth.signIn}
             </button>
           </p>
         </div>

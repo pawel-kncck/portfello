@@ -21,6 +21,8 @@ export const users = pgTable('users', {
   name: text('name'),
   image: text('image'),
   passwordHash: text('passwordHash'),
+  language: varchar('language', { length: 5 }).notNull().default('pl'),
+  currency: varchar('currency', { length: 5 }).notNull().default('PLN'),
   createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).notNull().defaultNow(),
 })
 

@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
-import { Plus, DollarSign, Calendar, TrendingUp, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Calendar, TrendingUp, Pencil, Trash2, Wallet } from 'lucide-react'
 import { AddExpenseModal } from './AddExpenseModal'
 import { EditExpenseModal } from './EditExpenseModal'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Expense {
   id: string
@@ -23,6 +24,7 @@ export function DashboardView() {
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
+  const { t, formatCurrency, formatDate } = useI18n()
 
   const fetchExpenses = useCallback(async () => {
     try {
@@ -50,7 +52,7 @@ export function DashboardView() {
     })
     if (!res.ok) {
       const data = await res.json()
-      return { success: false, error: data.error || 'Failed to add expense' }
+      return { success: false, error: data.error || t.expenses.addFailed }
     }
     await fetchExpenses()
     return { success: true }
@@ -64,7 +66,7 @@ export function DashboardView() {
     })
     if (!res.ok) {
       const err = await res.json()
-      return { success: false, error: err.error || 'Failed to update expense' }
+      return { success: false, error: err.error || t.expenses.updateFailed }
     }
     await fetchExpenses()
     return { success: true }
@@ -87,56 +89,56 @@ export function DashboardView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl text-gray-900">
-            Welcome back!
+            {t.dashboard.welcomeBack}
           </h2>
           <p className="text-sm sm:text-base text-gray-600 mt-1">
-            Track and manage your expenses efficiently
+            {t.dashboard.trackExpenses}
           </p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto" onClick={() => setShowAddModal(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Expense
+          {t.dashboard.addExpense}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm">This Month</CardTitle>
+            <CardTitle className="text-sm">{t.dashboard.thisMonth}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl">${monthlyTotal.toFixed(2)}</div>
+            <div className="text-2xl">{formatCurrency(monthlyTotal)}</div>
             <p className="text-xs text-muted-foreground">
-              {monthlyExpenses.length} transactions
+              {monthlyExpenses.length} {t.common.transactions}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm">Total Expenses</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm">{t.dashboard.totalExpenses}</CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl">${totalExpenses.toFixed(2)}</div>
+            <div className="text-2xl">{formatCurrency(totalExpenses)}</div>
             <p className="text-xs text-muted-foreground">
-              {expenses.length} total transactions
+              {expenses.length} {t.common.totalTransactions}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm">Average</CardTitle>
+            <CardTitle className="text-sm">{t.dashboard.average}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl">
-              ${expenses.length > 0 ? (totalExpenses / expenses.length).toFixed(2) : '0.00'}
+              {formatCurrency(expenses.length > 0 ? totalExpenses / expenses.length : 0)}
             </div>
             <p className="text-xs text-muted-foreground">
-              Per transaction
+              {t.common.perTransaction}
             </p>
           </CardContent>
         </Card>
@@ -144,15 +146,15 @@ export function DashboardView() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Expenses</CardTitle>
+          <CardTitle>{t.dashboard.recentExpenses}</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">Loading...</div>
+            <div className="text-center py-8">{t.common.loading}</div>
           ) : expenses.length === 0 ? (
             <div className="text-center py-8">
-              <DollarSign className="mx-auto h-12 w-12 text-gray-400" />
-              <p className="mt-2 text-gray-500">No expenses yet</p>
+              <Wallet className="mx-auto h-12 w-12 text-gray-400" />
+              <p className="mt-2 text-gray-500">{t.dashboard.noExpensesYet}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -160,11 +162,13 @@ export function DashboardView() {
                 <div key={expense.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 flex-wrap">
-                      <span className="font-medium">${expense.amount.toFixed(2)}</span>
-                      <span className="px-2 py-1 text-xs bg-gray-100 rounded">{expense.category}</span>
+                      <span className="font-medium">{formatCurrency(expense.amount)}</span>
+                      <span className="px-2 py-1 text-xs bg-gray-100 rounded">
+                        {t.categories[expense.category as keyof typeof t.categories] || expense.category}
+                      </span>
                     </div>
                     <p className="text-sm text-gray-500 mt-1 truncate">
-                      {new Date(expense.date).toLocaleDateString()} - {expense.description || 'No description'}
+                      {formatDate(expense.date)} - {expense.description || t.common.noDescription}
                     </p>
                   </div>
                   <div className="flex space-x-2 self-end sm:self-center">

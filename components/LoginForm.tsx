@@ -5,6 +5,7 @@ import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription } from './ui/alert';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useI18n } from '@/lib/i18n/context';
 
 interface LoginFormProps {
   onLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -17,6 +18,7 @@ export function LoginForm({ onLogin, onSwitchToSignup }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useI18n();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,20 +26,20 @@ export function LoginForm({ onLogin, onSwitchToSignup }: LoginFormProps) {
     setError('');
 
     const result = await onLogin(email, password);
-    
+
     if (!result.success) {
-      setError(result.error || 'Login failed');
+      setError(result.error || t.auth.loginFailed);
     }
-    
+
     setLoading(false);
   };
 
   return (
     <Card className="w-full">
       <CardHeader className="text-center">
-        <CardTitle>Sign In</CardTitle>
+        <CardTitle>{t.auth.signIn}</CardTitle>
         <CardDescription>
-          Enter your credentials to access Portfello
+          {t.auth.signInDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -47,28 +49,28 @@ export function LoginForm({ onLogin, onSwitchToSignup }: LoginFormProps) {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t.auth.email}</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder={t.auth.emailPlaceholder}
               required
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t.auth.password}</Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder={t.auth.passwordPlaceholder}
                 required
               />
               <button
@@ -81,7 +83,7 @@ export function LoginForm({ onLogin, onSwitchToSignup }: LoginFormProps) {
               </button>
             </div>
           </div>
-          
+
           <Button
             type="submit"
             className="w-full"
@@ -90,23 +92,23 @@ export function LoginForm({ onLogin, onSwitchToSignup }: LoginFormProps) {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing In...
+                {t.auth.signingIn}
               </>
             ) : (
-              'Sign In'
+              t.auth.signIn
             )}
           </Button>
         </form>
-        
+
         <div className="mt-6 text-center">
           <p className="text-gray-600">
-            Don't have an account?{' '}
+            {t.auth.noAccount}{' '}
             <button
               type="button"
               onClick={onSwitchToSignup}
               className="text-blue-600 hover:text-blue-500 underline"
             >
-              Sign up
+              {t.auth.signUp}
             </button>
           </p>
         </div>

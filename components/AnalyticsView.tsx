@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 import { TrendingUp, PieChart as PieChartIcon, BarChart3 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface Expense {
   id: string
@@ -22,6 +23,7 @@ export function AnalyticsView() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('all')
+  const { t, formatCurrency, formatMonthYear, language } = useI18n()
 
   const fetchExpenses = useCallback(async () => {
     try {
@@ -67,12 +69,15 @@ export function AnalyticsView() {
   }, {} as Record<string, number>)
 
   const pieChartData = Object.entries(categoryData).map(([category, amount]) => ({
-    name: category,
+    name: t.categories[category as keyof typeof t.categories] || category,
     value: amount,
   })).sort((a, b) => b.value - a.value)
 
+  const localeMap: Record<string, string> = { pl: 'pl-PL', en: 'en-US' }
+  const locale = localeMap[language] || 'pl-PL'
+
   const monthlyData = filteredExpenses.reduce((acc, expense) => {
-    const monthKey = new Date(expense.date).toLocaleDateString('en-US', {
+    const monthKey = new Date(expense.date).toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
     })
@@ -90,24 +95,24 @@ export function AnalyticsView() {
   const topCategory = pieChartData[0]
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64">Loading...</div>
+    return <div className="flex items-center justify-center h-64">{t.common.loading}</div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl text-gray-900">Analytics</h2>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Analyze your spending patterns</p>
+          <h2 className="text-2xl sm:text-3xl text-gray-900">{t.analytics.title}</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">{t.analytics.subtitle}</p>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Time</SelectItem>
-            <SelectItem value="year">This Year</SelectItem>
-            <SelectItem value="month">This Month</SelectItem>
+            <SelectItem value="all">{t.analytics.allTime}</SelectItem>
+            <SelectItem value="year">{t.analytics.thisYear}</SelectItem>
+            <SelectItem value="month">{t.analytics.thisMonth}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -115,37 +120,37 @@ export function AnalyticsView() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm">Total Spent</CardTitle>
+            <CardTitle className="text-sm">{t.analytics.totalSpent}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl">${totalAmount.toFixed(2)}</div>
+            <div className="text-2xl">{formatCurrency(totalAmount)}</div>
             <p className="text-xs text-muted-foreground">
-              {filteredExpenses.length} transactions
+              {filteredExpenses.length} {t.common.transactions}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm">Average Transaction</CardTitle>
+            <CardTitle className="text-sm">{t.analytics.averageTransaction}</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl">${averageExpense.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Per expense</p>
+            <div className="text-2xl">{formatCurrency(averageExpense)}</div>
+            <p className="text-xs text-muted-foreground">{t.common.perExpense}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm">Top Category</CardTitle>
+            <CardTitle className="text-sm">{t.analytics.topCategory}</CardTitle>
             <PieChartIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl">{topCategory?.name || 'N/A'}</div>
+            <div className="text-2xl">{topCategory?.name || t.common.noData}</div>
             <p className="text-xs text-muted-foreground">
-              {topCategory ? `$${topCategory.value.toFixed(2)}` : 'No data'}
+              {topCategory ? formatCurrency(topCategory.value) : t.analytics.noExpenseData}
             </p>
           </CardContent>
         </Card>
@@ -154,8 +159,8 @@ export function AnalyticsView() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Spending by Category</CardTitle>
-            <CardDescription>Breakdown of expenses by category</CardDescription>
+            <CardTitle>{t.analytics.spendingByCategory}</CardTitle>
+            <CardDescription>{t.analytics.categoryBreakdown}</CardDescription>
           </CardHeader>
           <CardContent>
             {pieChartData.length > 0 ? (
@@ -176,13 +181,13 @@ export function AnalyticsView() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']} />
+                    <Tooltip formatter={(value: number) => [formatCurrency(value), t.common.amount]} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             ) : (
               <div className="h-64 sm:h-80 flex items-center justify-center text-gray-500">
-                No expense data available
+                {t.analytics.noExpenseData}
               </div>
             )}
           </CardContent>
@@ -190,8 +195,8 @@ export function AnalyticsView() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Trends</CardTitle>
-            <CardDescription>Total expenses by month</CardDescription>
+            <CardTitle>{t.analytics.monthlyTrends}</CardTitle>
+            <CardDescription>{t.analytics.totalByMonth}</CardDescription>
           </CardHeader>
           <CardContent>
             {barChartData.length > 0 ? (
@@ -201,14 +206,14 @@ export function AnalyticsView() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']} />
+                    <Tooltip formatter={(value: number) => [formatCurrency(value), t.common.amount]} />
                     <Bar dataKey="amount" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             ) : (
               <div className="h-64 sm:h-80 flex items-center justify-center text-gray-500">
-                No expense data available
+                {t.analytics.noExpenseData}
               </div>
             )}
           </CardContent>

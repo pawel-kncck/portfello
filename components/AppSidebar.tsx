@@ -5,12 +5,14 @@ import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
-import { BarChart3, Home, LogOut, Menu, User, X } from 'lucide-react'
+import { BarChart3, Home, LogOut, Menu, Settings, User, X } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
+import { useI18n } from '@/lib/i18n/context'
 
 export function AppSidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const { t } = useI18n()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const userName = session?.user?.name || 'User'
@@ -75,7 +77,7 @@ export function AppSidebar() {
         >
           <Link href="/dashboard">
             <Home className="mr-3 h-4 w-4" />
-            Dashboard
+            {t.nav.dashboard}
           </Link>
         </Button>
 
@@ -86,7 +88,18 @@ export function AppSidebar() {
         >
           <Link href="/analytics">
             <BarChart3 className="mr-3 h-4 w-4" />
-            Analytics
+            {t.nav.analytics}
+          </Link>
+        </Button>
+
+        <Button
+          variant={pathname === '/settings' ? 'default' : 'ghost'}
+          className="w-full justify-start"
+          asChild
+        >
+          <Link href="/settings">
+            <Settings className="mr-3 h-4 w-4" />
+            {t.nav.settings}
           </Link>
         </Button>
       </nav>
@@ -108,7 +121,7 @@ export function AppSidebar() {
           onClick={() => signOut({ callbackUrl: '/login' })}
         >
           <LogOut className="mr-3 h-4 w-4" />
-          Logout
+          {t.nav.logout}
         </Button>
       </div>
     </div>

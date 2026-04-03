@@ -1,0 +1,133 @@
+export const pl = {
+  // Common
+  common: {
+    loading: 'Ladowanie...',
+    cancel: 'Anuluj',
+    save: 'Zapisz',
+    delete: 'Usun',
+    edit: 'Edytuj',
+    noDescription: 'Brak opisu',
+    transactions: 'transakcji',
+    totalTransactions: 'lacznie transakcji',
+    perTransaction: 'Na transakcje',
+    perExpense: 'Na wydatek',
+    noData: 'Brak danych',
+    amount: 'Kwota',
+    total: 'Lacznie:',
+  },
+
+  // Navigation
+  nav: {
+    dashboard: 'Panel glowny',
+    analytics: 'Analityka',
+    settings: 'Ustawienia',
+    logout: 'Wyloguj',
+  },
+
+  // Dashboard
+  dashboard: {
+    welcomeBack: 'Witaj ponownie!',
+    trackExpenses: 'Sledz i zarzadzaj swoimi wydatkami efektywnie',
+    addExpense: 'Dodaj wydatek',
+    thisMonth: 'Ten miesiac',
+    totalExpenses: 'Calkowite wydatki',
+    average: 'Srednia',
+    recentExpenses: 'Ostatnie wydatki',
+    noExpensesYet: 'Brak wydatkow',
+  },
+
+  // Analytics
+  analytics: {
+    title: 'Analityka',
+    subtitle: 'Analizuj swoje wzorce wydatkow',
+    allTime: 'Caly czas',
+    thisYear: 'Ten rok',
+    thisMonth: 'Ten miesiac',
+    totalSpent: 'Wydano lacznie',
+    averageTransaction: 'Srednia transakcja',
+    topCategory: 'Glowna kategoria',
+    spendingByCategory: 'Wydatki wg kategorii',
+    categoryBreakdown: 'Podzial wydatkow wg kategorii',
+    monthlyTrends: 'Trendy miesieczne',
+    totalByMonth: 'Calkowite wydatki wg miesiecy',
+    noExpenseData: 'Brak danych o wydatkach',
+  },
+
+  // Expenses
+  expenses: {
+    addNew: 'Dodaj nowy wydatek',
+    addDescription: 'Wprowadz szczegoly nowego wydatku.',
+    editExpense: 'Edytuj wydatek',
+    editDescription: 'Zaktualizuj szczegoly tego wydatku.',
+    amount: 'Kwota *',
+    category: 'Kategoria *',
+    selectCategory: 'Wybierz kategorie',
+    date: 'Data',
+    description: 'Opis',
+    optionalDescription: 'Opcjonalny opis...',
+    adding: 'Dodawanie...',
+    addExpense: 'Dodaj wydatek',
+    updating: 'Aktualizowanie...',
+    updateExpense: 'Zaktualizuj wydatek',
+    deleteConfirm: 'Czy na pewno chcesz usunac ten wydatek?',
+    noExpensesYet: 'Brak wydatkow',
+    getStarted: 'Zacznij od dodania swojego pierwszego wydatku.',
+    amountRequired: 'Kwota i kategoria sa wymagane',
+    invalidAmount: 'Prosze podac prawidlowa kwote',
+    addFailed: 'Nie udalo sie dodac wydatku',
+    updateFailed: 'Nie udalo sie zaktualizowac wydatku',
+  },
+
+  // Categories
+  categories: {
+    Food: 'Jedzenie',
+    Transport: 'Transport',
+    Utilities: 'Media',
+    Entertainment: 'Rozrywka',
+    Healthcare: 'Zdrowie',
+    Shopping: 'Zakupy',
+    Other: 'Inne',
+  },
+
+  // Auth
+  auth: {
+    signIn: 'Zaloguj sie',
+    signInDescription: 'Wprowadz dane logowania do Portfello',
+    email: 'Email',
+    emailPlaceholder: 'Wprowadz swoj email',
+    password: 'Haslo',
+    passwordPlaceholder: 'Wprowadz swoje haslo',
+    signingIn: 'Logowanie...',
+    loginFailed: 'Logowanie nie powiodlo sie',
+    noAccount: 'Nie masz konta?',
+    signUp: 'Zarejestruj sie',
+    createAccount: 'Utworz konto',
+    createAccountDescription: 'Zarejestruj sie, aby zaczac sledzic wydatki',
+    confirmPassword: 'Potwierdz haslo',
+    confirmPasswordPlaceholder: 'Potwierdz swoje haslo',
+    creatingAccount: 'Tworzenie konta...',
+    signupFailed: 'Rejestracja nie powiodla sie',
+    hasAccount: 'Masz juz konto?',
+    passwordsMismatch: 'Hasla nie sa zgodne',
+    passwordTooShort: 'Haslo musi miec co najmniej 6 znakow',
+    invalidCredentials: 'Nieprawidlowy email lub haslo',
+    accountCreatedLoginFailed: 'Konto utworzone, ale logowanie nie powiodlo sie. Zaloguj sie recznie.',
+  },
+
+  // Settings
+  settings: {
+    title: 'Ustawienia',
+    subtitle: 'Zarzadzaj preferencjami aplikacji',
+    language: 'Jezyk',
+    languageDescription: 'Wybierz preferowany jezyk interfejsu',
+    currency: 'Waluta',
+    currencyDescription: 'Wybierz domyslna walute do wyswietlania',
+    polish: 'Polski',
+    english: 'English',
+    pln: 'PLN (Zloty polski)',
+    usd: 'USD (Dolar amerykanski)',
+    saving: 'Zapisywanie...',
+    saved: 'Zapisano ustawienia',
+    saveFailed: 'Nie udalo sie zapisac ustawien',
+  },
+} as const
