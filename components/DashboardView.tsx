@@ -7,6 +7,7 @@ import { Plus, Calendar, TrendingUp, Pencil, Trash2, Wallet } from 'lucide-react
 import { AddExpenseModal } from './AddExpenseModal'
 import { EditExpenseModal } from './EditExpenseModal'
 import { useI18n } from '@/lib/i18n/context'
+import { useWallet } from '@/lib/wallet/context'
 
 interface Expense {
   id: string
@@ -25,10 +26,14 @@ export function DashboardView() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const { t, formatCurrency, formatDate } = useI18n()
+  const { activeWallet } = useWallet()
 
   const fetchExpenses = useCallback(async () => {
     try {
-      const res = await fetch('/api/expenses')
+      const url = activeWallet
+        ? `/api/expenses?walletId=${activeWallet.id}`
+        : '/api/expenses'
+      const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
         setExpenses(data.expenses || [])
@@ -38,9 +43,10 @@ export function DashboardView() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [activeWallet])
 
   useEffect(() => {
+    setLoading(true)
     fetchExpenses()
   }, [fetchExpenses])
 
@@ -48,7 +54,7 @@ export function DashboardView() {
     const res = await fetch('/api/expenses', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(expense),
+      body: JSON.stringify({ ...expense, walletId: activeWallet?.id }),
     })
     if (!res.ok) {
       const data = await res.json()

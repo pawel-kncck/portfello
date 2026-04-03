@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 import { TrendingUp, PieChart as PieChartIcon, BarChart3 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
+import { useWallet } from '@/lib/wallet/context'
 
 interface Expense {
   id: string
@@ -24,10 +25,14 @@ export function AnalyticsView() {
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('all')
   const { t, formatCurrency, formatMonthYear, language } = useI18n()
+  const { activeWallet } = useWallet()
 
   const fetchExpenses = useCallback(async () => {
     try {
-      const res = await fetch('/api/expenses')
+      const url = activeWallet
+        ? `/api/expenses?walletId=${activeWallet.id}`
+        : '/api/expenses'
+      const res = await fetch(url)
       if (res.ok) {
         const data = await res.json()
         setExpenses(data.expenses || [])
@@ -37,9 +42,10 @@ export function AnalyticsView() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [activeWallet])
 
   useEffect(() => {
+    setLoading(true)
     fetchExpenses()
   }, [fetchExpenses])
 
