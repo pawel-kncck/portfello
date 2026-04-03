@@ -21,6 +21,7 @@ export const en = {
     dashboard: 'Dashboard',
     analytics: 'Analytics',
     settings: 'Settings',
+    walletSettings: 'Wallet Settings',
     logout: 'Logout',
   },
 

@@ -21,6 +21,7 @@ export const pl = {
     dashboard: 'Panel glowny',
     analytics: 'Analityka',
     settings: 'Ustawienia',
+    walletSettings: 'Ustawienia portfela',
     logout: 'Wyloguj',
   },
 
