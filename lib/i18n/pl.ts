@@ -114,6 +114,30 @@ export const pl = {
     accountCreatedLoginFailed: 'Konto utworzone, ale logowanie nie powiodlo sie. Zaloguj sie recznie.',
   },
 
+  // Wallets
+  wallets: {
+    personal: 'Osobisty',
+    shared: 'Wspolny',
+    myWallets: 'Moje portfele',
+    createWallet: 'Utworz portfel',
+    walletName: 'Nazwa portfela',
+    walletNamePlaceholder: 'np. Domowy, Wspolne konto...',
+    creating: 'Tworzenie...',
+    deleteWallet: 'Usun portfel',
+    deleteConfirm: 'Czy na pewno chcesz usunac ten portfel? Wszystkie wydatki w nim zostana utracone.',
+    cannotDeletePersonal: 'Nie mozna usunac portfela osobistego',
+    members: 'Czlonkowie',
+    inviteMember: 'Zapros czlonka',
+    emailPlaceholder: 'Wprowadz adres email',
+    inviting: 'Zapraszanie...',
+    removeMember: 'Usun',
+    owner: 'Wlasciciel',
+    member: 'Czlonek',
+    userNotFound: 'Uzytkownik nie znaleziony',
+    alreadyMember: 'Uzytkownik jest juz czlonkiem',
+    switchWallet: 'Zmien portfel',
+  },
+
   // Settings
   settings: {
     title: 'Ustawienia',

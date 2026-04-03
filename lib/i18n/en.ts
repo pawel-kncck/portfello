@@ -114,6 +114,30 @@ export const en = {
     accountCreatedLoginFailed: 'Account created but login failed. Please sign in manually.',
   },
 
+  // Wallets
+  wallets: {
+    personal: 'Personal',
+    shared: 'Shared',
+    myWallets: 'My Wallets',
+    createWallet: 'Create Wallet',
+    walletName: 'Wallet name',
+    walletNamePlaceholder: 'e.g. Household, Joint account...',
+    creating: 'Creating...',
+    deleteWallet: 'Delete Wallet',
+    deleteConfirm: 'Are you sure you want to delete this wallet? All expenses in it will be lost.',
+    cannotDeletePersonal: 'Cannot delete personal wallet',
+    members: 'Members',
+    inviteMember: 'Invite Member',
+    emailPlaceholder: 'Enter email address',
+    inviting: 'Inviting...',
+    removeMember: 'Remove',
+    owner: 'Owner',
+    member: 'Member',
+    userNotFound: 'User not found',
+    alreadyMember: 'User is already a member',
+    switchWallet: 'Switch wallet',
+  },
+
   // Settings
   settings: {
     title: 'Settings',
