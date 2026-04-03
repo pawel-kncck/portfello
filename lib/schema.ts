@@ -1,0 +1,93 @@
+import {
+  pgTable,
+  text,
+  timestamp,
+  integer,
+  decimal,
+  varchar,
+  date,
+  uniqueIndex,
+  index,
+  primaryKey,
+} from 'drizzle-orm/pg-core'
+import { relations } from 'drizzle-orm'
+
+// ─── Auth.js models ───
+
+export const users = pgTable('users', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: text('email').notNull().unique(),
+  emailVerified: timestamp('emailVerified', { precision: 3, mode: 'date' }),
+  name: text('name'),
+  image: text('image'),
+  passwordHash: text('passwordHash'),
+  createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).notNull().defaultNow(),
+})
+
+export const accounts = pgTable('accounts', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  type: text('type').notNull(),
+  provider: text('provider').notNull(),
+  providerAccountId: text('providerAccountId').notNull(),
+  refresh_token: text('refresh_token'),
+  access_token: text('access_token'),
+  expires_at: integer('expires_at'),
+  token_type: text('token_type'),
+  scope: text('scope'),
+  id_token: text('id_token'),
+  session_state: text('session_state'),
+}, (table) => [
+  uniqueIndex('accounts_provider_providerAccountId_key').on(table.provider, table.providerAccountId),
+])
+
+export const sessions = pgTable('sessions', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  sessionToken: text('sessionToken').notNull().unique(),
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  expires: timestamp('expires', { precision: 3, mode: 'date' }).notNull(),
+})
+
+export const verificationTokens = pgTable('verification_tokens', {
+  identifier: text('identifier').notNull(),
+  token: text('token').notNull().unique(),
+  expires: timestamp('expires', { precision: 3, mode: 'date' }).notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.identifier, table.token] }),
+])
+
+// ─── App models ───
+
+export const expenses = pgTable('expenses', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
+  category: varchar('category', { length: 50 }).notNull(),
+  description: text('description'),
+  date: date('date', { mode: 'date' }).notNull(),
+  createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).$onUpdate(() => new Date()),
+}, (table) => [
+  index('expenses_userId_idx').on(table.userId),
+  index('expenses_date_idx').on(table.date),
+])
+
+// ─── Relations ───
+
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  sessions: many(sessions),
+  expenses: many(expenses),
+}))
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+}))
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}))
+
+export const expensesRelations = relations(expenses, ({ one }) => ({
+  user: one(users, { fields: [expenses.userId], references: [users.id] }),
+}))
