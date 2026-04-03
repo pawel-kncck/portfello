@@ -192,4 +192,26 @@
 
 html {
   font-size: var(--font-size);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure minimum touch target size on mobile */
+@media (max-width: 767px) {
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
