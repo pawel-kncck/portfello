@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { eq, and } from 'drizzle-orm'
 import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
+import { expenses } from '@/lib/schema'
 
 const expenseSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
@@ -10,12 +12,13 @@ const expenseSchema = z.object({
   description: z.string().max(500).optional(),
 })
 
-function serializeExpense(e: { id: string; amount: unknown; category: string; date: Date; description: string | null; createdAt: Date; updatedAt: Date | null }) {
+function serializeExpense(e: { id: string; amount: string; category: string; date: Date | string; description: string | null; createdAt: Date; updatedAt: Date | null }) {
+  const dateValue = e.date instanceof Date ? e.date : new Date(e.date)
   return {
     id: e.id,
     amount: Number(e.amount),
     category: e.category,
-    date: e.date.toISOString().split('T')[0],
+    date: dateValue.toISOString().split('T')[0],
     description: e.description,
     createdAt: e.createdAt,
     updatedAt: e.updatedAt,
@@ -33,8 +36,8 @@ export async function PUT(
 
   const { id } = await params
 
-  const existing = await prisma.expense.findFirst({
-    where: { id, userId: session.user.id },
+  const existing = await db.query.expenses.findFirst({
+    where: and(eq(expenses.id, id), eq(expenses.userId, session.user.id)),
   })
   if (!existing) {
     return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
@@ -46,15 +49,15 @@ export async function PUT(
     return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
   }
 
-  const expense = await prisma.expense.update({
-    where: { id },
-    data: {
-      amount: parsed.data.amount,
+  const [expense] = await db.update(expenses)
+    .set({
+      amount: String(parsed.data.amount),
       category: parsed.data.category,
       date: new Date(parsed.data.date),
       description: parsed.data.description || null,
-    },
-  })
+    })
+    .where(eq(expenses.id, id))
+    .returning()
 
   return NextResponse.json({ expense: serializeExpense(expense) })
 }
@@ -70,14 +73,14 @@ export async function DELETE(
 
   const { id } = await params
 
-  const existing = await prisma.expense.findFirst({
-    where: { id, userId: session.user.id },
+  const existing = await db.query.expenses.findFirst({
+    where: and(eq(expenses.id, id), eq(expenses.userId, session.user.id)),
   })
   if (!existing) {
     return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
   }
 
-  await prisma.expense.delete({ where: { id } })
+  await db.delete(expenses).where(eq(expenses.id, id))
 
   return NextResponse.json({ success: true })
 }

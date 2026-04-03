@@ -1,12 +1,19 @@
 import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@auth/prisma-adapter'
+import { DrizzleAdapter } from '@auth/drizzle-adapter'
 import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
+import { eq } from 'drizzle-orm'
+import { db } from '@/lib/db'
+import { users, accounts, sessions, verificationTokens } from '@/lib/schema'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
-  adapter: PrismaAdapter(prisma),
+  adapter: DrizzleAdapter(db, {
+    usersTable: users,
+    accountsTable: accounts,
+    sessionsTable: sessions,
+    verificationTokensTable: verificationTokens,
+  } as never),
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',
@@ -23,7 +30,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!email || !password) return null
 
-        const user = await prisma.user.findUnique({ where: { email } })
+        const user = await db.query.users.findFirst({
+          where: eq(users.email, email),
+        })
         if (!user?.passwordHash) return null
 
         const isValid = await bcrypt.compare(password, user.passwordHash)

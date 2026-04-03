@@ -2,7 +2,9 @@
 
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
+import { eq } from 'drizzle-orm'
+import { db } from '@/lib/db'
+import { users } from '@/lib/schema'
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -22,15 +24,19 @@ export async function signup(email: string, password: string, name: string): Pro
   }
 
   try {
-    const existing = await prisma.user.findUnique({ where: { email: parsed.data.email } })
+    const existing = await db.query.users.findFirst({
+      where: eq(users.email, parsed.data.email),
+    })
     if (existing) {
       return { success: false, error: 'Unable to create account. Please try again.' }
     }
 
     const passwordHash = await bcrypt.hash(parsed.data.password, 12)
 
-    await prisma.user.create({
-      data: { email: parsed.data.email, name: parsed.data.name, passwordHash },
+    await db.insert(users).values({
+      email: parsed.data.email,
+      name: parsed.data.name,
+      passwordHash,
     })
 
     return { success: true }
