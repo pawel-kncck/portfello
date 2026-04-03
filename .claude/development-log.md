@@ -303,3 +303,108 @@ Started: 2026-04-02
 - 83 occurrences replaced, 0 remaining
 
 ---
+
+## Session: 2026-04-03 22:00
+
+### Todo List:
+- [x] Add wallets and wallet_members tables to Drizzle schema
+- [x] Generate database migration for wallet tables
+- [x] Add walletId to expenses table and update schema
+- [x] Auto-create personal wallet on user signup
+- [x] Create wallet API endpoints (CRUD + member management)
+- [x] Update expense API routes to scope by wallet
+- [x] Add i18n translations for wallet-related strings
+- [x] Add wallet context provider for active wallet state
+- [x] Add wallet switcher to sidebar
+- [x] Update DashboardView and AnalyticsView to use active wallet
+- [x] Write tests for wallet features
+- [x] Update development log and push
+
+### Changes:
+
+#### 22:00 - Add wallets and wallet_members tables to Drizzle schema
+**Commit**: `b9d254b` - `feat(db): add wallets and wallet_members tables with walletId on expenses`
+**Files Modified**: 
+- `lib/schema.ts` - Added walletTypeEnum, walletRoleEnum, wallets table, walletMembers table, walletId on expenses, updated relations
+- `drizzle/0002_sturdy_blindfold.sql` - Generated migration
+- `drizzle.config.ts` - Fixed dotenv import for environments without dotenv
+
+**Details**:
+- wallets: id, name (varchar 100), type (personal|shared), createdAt
+- wallet_members: id, walletId (FK), userId (FK), role (owner|member), joinedAt, unique(walletId, userId)
+- expenses: added nullable walletId FK for backwards compatibility with existing data
+
+#### 22:02 - Auto-create personal wallet on signup
+**Commit**: `ceb7b7d` - `feat(auth): auto-create personal wallet on user signup`
+**Files Modified**: 
+- `app/(auth)/signup/action.ts` - After creating user, creates personal wallet and adds user as owner
+
+#### 22:03 - Wallet and member API endpoints
+**Commit**: `2431ec7` - `feat(api): add wallet CRUD and member management API endpoints`
+**Files Created**: 
+- `app/api/wallets/route.ts` - GET (list user's wallets), POST (create shared wallet)
+- `app/api/wallets/[id]/route.ts` - PUT (rename), DELETE (owner only, not personal)
+- `app/api/wallets/[id]/members/route.ts` - GET (list members), POST (invite by email, owner only)
+- `app/api/wallets/[id]/members/[userId]/route.ts` - DELETE (remove member, owner only)
+
+**Details**:
+- All endpoints enforce membership checks and role-based permissions
+- Personal wallets cannot be shared or deleted
+- Invite checks: user exists, not already member, wallet is shared type
+- Owner cannot remove themselves
+
+#### 22:04 - Scope expense routes by wallet
+**Commit**: `cd9f1f7` - `feat(api): scope expense routes by wallet with membership checks`
+**Files Modified**: 
+- `app/api/expenses/route.ts` - GET accepts walletId query param, POST requires walletId
+- `app/api/expenses/[id]/route.ts` - PUT/DELETE check wallet membership
+
+**Details**:
+- Backwards compatible: expenses without walletId still accessible by userId
+- New expenses require walletId and verify membership before creation
+
+#### 22:05 - Add wallet i18n translations
+**Commit**: `52c58a6` - `feat(i18n): add wallet-related translations for Polish and English`
+**Files Modified**: 
+- `lib/i18n/en.ts` - Added wallets section with 20 keys
+- `lib/i18n/pl.ts` - Added wallets section with 20 Polish keys
+
+#### 22:06 - Add wallet context provider
+**Commit**: `a66b22a` - `feat(wallet): add wallet context provider with active wallet state`
+**Files Created**: 
+- `lib/wallet/context.tsx` - WalletProvider, useWallet hook
+
+**Files Modified**: 
+- `components/Providers.tsx` - Added WalletProvider wrapping app
+
+**Details**:
+- Fetches wallets on auth, manages active wallet selection
+- Persists active wallet ID in localStorage
+- Defaults to personal wallet on first load
+
+#### 22:07 - Add wallet switcher to sidebar
+**Commit**: `7d652f5` - `feat(sidebar): add wallet switcher with dropdown and inline creation`
+**Files Modified**: 
+- `components/AppSidebar.tsx` - Added wallet switcher section with dropdown, wallet list, shared badges, inline create form
+
+#### 22:08 - Scope views to active wallet
+**Commit**: `1af8f61` - `feat(views): scope dashboard and analytics to active wallet`
+**Files Modified**: 
+- `components/DashboardView.tsx` - Fetch expenses by active wallet, pass walletId on create
+- `components/AnalyticsView.tsx` - Fetch expenses by active wallet
+
+#### 22:09 - Write wallet tests
+**Commit**: `e83f433` - `test(wallet): add wallet switcher and schema validation tests`
+**Files Created**: 
+- `tests/components/WalletSwitcher.test.tsx` - 9 tests for wallet switcher UI
+- `tests/unit/wallet-schema.test.ts` - 13 tests for validation schemas
+
+**Files Modified**: 
+- `tests/components/AppSidebar.test.tsx` - Added wallet context mock
+
+**Details**:
+- All 56 tests passing (22 new + 34 existing)
+- WalletSwitcher: render, dropdown, selection, badges, create form
+- Schema: create wallet, invite member, expense-with-wallet validation
+
+---

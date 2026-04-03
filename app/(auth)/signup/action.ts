@@ -4,7 +4,7 @@ import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { users } from '@/lib/schema'
+import { users, wallets, walletMembers } from '@/lib/schema'
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -32,9 +32,21 @@ export async function signup(email: string, password: string): Promise<SignupRes
 
     const passwordHash = await bcrypt.hash(parsed.data.password, 12)
 
-    await db.insert(users).values({
+    const [newUser] = await db.insert(users).values({
       email: parsed.data.email,
       passwordHash,
+    }).returning({ id: users.id })
+
+    // Auto-create personal wallet for new user
+    const [wallet] = await db.insert(wallets).values({
+      name: 'Personal',
+      type: 'personal',
+    }).returning({ id: wallets.id })
+
+    await db.insert(walletMembers).values({
+      walletId: wallet.id,
+      userId: newUser.id,
+      role: 'owner',
     })
 
     return { success: true }

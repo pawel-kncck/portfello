@@ -9,8 +9,14 @@ import {
   uniqueIndex,
   index,
   primaryKey,
+  pgEnum,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
+
+// ─── Enums ───
+
+export const walletTypeEnum = pgEnum('wallet_type', ['personal', 'shared'])
+export const walletRoleEnum = pgEnum('wallet_role', ['owner', 'member'])
 
 // ─── Auth.js models ───
 
@@ -60,9 +66,27 @@ export const verificationTokens = pgTable('verification_tokens', {
 
 // ─── App models ───
 
+export const wallets = pgTable('wallets', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: varchar('name', { length: 100 }).notNull(),
+  type: walletTypeEnum('type').notNull().default('personal'),
+  createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).notNull().defaultNow(),
+})
+
+export const walletMembers = pgTable('wallet_members', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  walletId: text('walletId').notNull().references(() => wallets.id, { onDelete: 'cascade' }),
+  userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  role: walletRoleEnum('role').notNull().default('member'),
+  joinedAt: timestamp('joinedAt', { precision: 3, mode: 'date' }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex('wallet_members_walletId_userId_key').on(table.walletId, table.userId),
+])
+
 export const expenses = pgTable('expenses', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  walletId: text('walletId').references(() => wallets.id, { onDelete: 'cascade' }),
   amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
   category: varchar('category', { length: 50 }).notNull(),
   description: text('description'),
@@ -71,6 +95,7 @@ export const expenses = pgTable('expenses', {
   updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).$onUpdate(() => new Date()),
 }, (table) => [
   index('expenses_userId_idx').on(table.userId),
+  index('expenses_walletId_idx').on(table.walletId),
   index('expenses_date_idx').on(table.date),
 ])
 
@@ -80,6 +105,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
   expenses: many(expenses),
+  walletMemberships: many(walletMembers),
 }))
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -90,6 +116,17 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 }))
 
+export const walletsRelations = relations(wallets, ({ many }) => ({
+  members: many(walletMembers),
+  expenses: many(expenses),
+}))
+
+export const walletMembersRelations = relations(walletMembers, ({ one }) => ({
+  wallet: one(wallets, { fields: [walletMembers.walletId], references: [wallets.id] }),
+  user: one(users, { fields: [walletMembers.userId], references: [users.id] }),
+}))
+
 export const expensesRelations = relations(expenses, ({ one }) => ({
   user: one(users, { fields: [expenses.userId], references: [users.id] }),
+  wallet: one(wallets, { fields: [expenses.walletId], references: [wallets.id] }),
 }))

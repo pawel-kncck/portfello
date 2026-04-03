@@ -37,6 +37,20 @@ vi.mock('@/lib/i18n/context', () => {
   }
 })
 
+// Mock wallet context
+vi.mock('@/lib/wallet/context', () => ({
+  useWallet: () => ({
+    wallets: [
+      { id: 'w1', name: 'Osobisty', type: 'personal', role: 'owner', createdAt: '2026-01-01' },
+      { id: 'w2', name: 'Domowy', type: 'shared', role: 'owner', createdAt: '2026-01-01' },
+    ],
+    activeWallet: { id: 'w1', name: 'Osobisty', type: 'personal', role: 'owner', createdAt: '2026-01-01' },
+    setActiveWalletId: vi.fn(),
+    refreshWallets: vi.fn(),
+    loading: false,
+  }),
+}))
+
 // Need to import after mocks
 import { AppSidebar } from '@/components/AppSidebar'
 
