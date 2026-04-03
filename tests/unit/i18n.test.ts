@@ -49,7 +49,7 @@ describe('i18n translation files', () => {
   it('Polish is the intended default language', () => {
     // Verify Polish translations contain Polish text
     expect(pl.dashboard.welcomeBack).toBe('Witaj ponownie!')
-    expect(pl.nav.dashboard).toBe('Panel glowny')
+    expect(pl.nav.dashboard).toBe('Panel główny')
     expect(pl.nav.settings).toBe('Ustawienia')
   })
 

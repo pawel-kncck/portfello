@@ -102,8 +102,8 @@ describe('Wallet Switcher', () => {
 
     await user.click(screen.getByTestId('wallet-switcher'))
 
-    // The shared wallets should show the "Wspolny" badge
-    const sharedBadges = screen.getAllByText('Wspolny')
+    // The shared wallets should show the "Wspólny" badge
+    const sharedBadges = screen.getAllByText('Wspólny')
     expect(sharedBadges.length).toBeGreaterThanOrEqual(2) // Domowy and Firma
   })
 
@@ -131,7 +131,7 @@ describe('Wallet Switcher', () => {
     await user.click(screen.getByTestId('wallet-switcher'))
 
     expect(screen.getByTestId('create-wallet-button')).toBeInTheDocument()
-    expect(screen.getByText('Utworz portfel')).toBeInTheDocument()
+    expect(screen.getByText('Utwórz portfel')).toBeInTheDocument()
   })
 
   it('shows inline create wallet form when create button is clicked', async () => {
