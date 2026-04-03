@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
-import { Edit2, Trash2, Calendar, DollarSign } from 'lucide-react';
+import { Edit2, Trash2, Calendar, Wallet } from 'lucide-react';
 import { EditExpenseModal } from './EditExpenseModal';
+import { useI18n } from '@/lib/i18n/context';
 
 interface Expense {
   id: string;
@@ -25,6 +26,7 @@ interface ExpenseListProps {
 
 export function ExpenseList({ expenses, loading, onUpdate, onDelete }: ExpenseListProps) {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const { t, formatCurrency, formatDate, formatMonthYear } = useI18n();
 
   if (loading) {
     return (
@@ -42,10 +44,10 @@ export function ExpenseList({ expenses, loading, onUpdate, onDelete }: ExpenseLi
   if (expenses.length === 0) {
     return (
       <div className="text-center py-12">
-        <DollarSign className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-gray-900">No expenses yet</h3>
+        <Wallet className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-gray-900">{t.expenses.noExpensesYet}</h3>
         <p className="mt-1 text-gray-500">
-          Get started by adding your first expense.
+          {t.expenses.getStarted}
         </p>
       </div>
     );
@@ -53,11 +55,8 @@ export function ExpenseList({ expenses, loading, onUpdate, onDelete }: ExpenseLi
 
   // Group expenses by month
   const groupedExpenses = expenses.reduce((groups, expense) => {
-    const monthKey = new Date(expense.date).toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long' 
-    });
-    
+    const monthKey = formatMonthYear(expense.date);
+
     if (!groups[monthKey]) {
       groups[monthKey] = [];
     }
@@ -79,7 +78,7 @@ export function ExpenseList({ expenses, loading, onUpdate, onDelete }: ExpenseLi
   };
 
   const handleDelete = async (expense: Expense) => {
-    if (window.confirm('Are you sure you want to delete this expense?')) {
+    if (window.confirm(t.expenses.deleteConfirm)) {
       await onDelete(expense.id);
     }
   };
@@ -88,7 +87,7 @@ export function ExpenseList({ expenses, loading, onUpdate, onDelete }: ExpenseLi
     <div className="space-y-6">
       {Object.entries(groupedExpenses).map(([month, monthExpenses]) => {
         const monthTotal = monthExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-        
+
         return (
           <div key={month} className="space-y-3">
             <div className="flex items-center justify-between gap-2">
@@ -97,24 +96,24 @@ export function ExpenseList({ expenses, loading, onUpdate, onDelete }: ExpenseLi
                 <h3 className="text-base sm:text-lg text-gray-900 truncate">{month}</h3>
               </div>
               <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
-                <span className="text-xs sm:text-sm text-gray-500">Total:</span>
-                <span className="text-base sm:text-lg text-gray-900">${monthTotal.toFixed(2)}</span>
+                <span className="text-xs sm:text-sm text-gray-500">{t.common.total}</span>
+                <span className="text-base sm:text-lg text-gray-900">{formatCurrency(monthTotal)}</span>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               {monthExpenses.map((expense) => (
                 <div key={expense.id} className="bg-gray-50 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap gap-y-1">
                       <Badge className={getCategoryColor(expense.category)}>
-                        {expense.category}
+                        {t.categories[expense.category as keyof typeof t.categories] || expense.category}
                       </Badge>
                       <span className="text-base sm:text-lg text-gray-900">
-                        ${expense.amount.toFixed(2)}
+                        {formatCurrency(expense.amount)}
                       </span>
                       <span className="text-xs sm:text-sm text-gray-500">
-                        {new Date(expense.date).toLocaleDateString()}
+                        {formatDate(expense.date)}
                       </span>
                     </div>
                     {expense.description && (
@@ -142,12 +141,12 @@ export function ExpenseList({ expenses, loading, onUpdate, onDelete }: ExpenseLi
                 </div>
               ))}
             </div>
-            
+
             <Separator />
           </div>
         );
       })}
-      
+
       {editingExpense && (
         <EditExpenseModal
           expense={editingExpense}

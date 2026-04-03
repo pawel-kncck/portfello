@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { Alert, AlertDescription } from './ui/alert';
 import { Loader2 } from 'lucide-react';
+import { useI18n } from '@/lib/i18n/context';
 
 interface Expense {
   amount: number;
@@ -38,6 +39,7 @@ export function AddExpenseModal({ isOpen, onClose, onAdd }: AddExpenseModalProps
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useI18n();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,14 +47,14 @@ export function AddExpenseModal({ isOpen, onClose, onAdd }: AddExpenseModalProps
     setError('');
 
     if (!amount || !category) {
-      setError('Amount and category are required');
+      setError(t.expenses.amountRequired);
       setLoading(false);
       return;
     }
 
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
-      setError('Please enter a valid amount');
+      setError(t.expenses.invalidAmount);
       setLoading(false);
       return;
     }
@@ -72,7 +74,7 @@ export function AddExpenseModal({ isOpen, onClose, onAdd }: AddExpenseModalProps
       setDescription('');
       onClose();
     } else {
-      setError(result.error || 'Failed to add expense');
+      setError(result.error || t.expenses.addFailed);
     }
 
     setLoading(false);
@@ -93,21 +95,21 @@ export function AddExpenseModal({ isOpen, onClose, onAdd }: AddExpenseModalProps
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Expense</DialogTitle>
+          <DialogTitle>{t.expenses.addNew}</DialogTitle>
           <DialogDescription>
-            Enter the details for your new expense entry.
+            {t.expenses.addDescription}
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount *</Label>
+            <Label htmlFor="amount">{t.expenses.amount}</Label>
             <Input
               id="amount"
               type="number"
@@ -119,25 +121,25 @@ export function AddExpenseModal({ isOpen, onClose, onAdd }: AddExpenseModalProps
               required
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="category">Category *</Label>
+            <Label htmlFor="category">{t.expenses.category}</Label>
             <Select value={category} onValueChange={setCategory} required>
               <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
+                <SelectValue placeholder={t.expenses.selectCategory} />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map((cat) => (
                   <SelectItem key={cat} value={cat}>
-                    {cat}
+                    {t.categories[cat as keyof typeof t.categories] || cat}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{t.expenses.date}</Label>
             <Input
               id="date"
               type="date"
@@ -146,18 +148,18 @@ export function AddExpenseModal({ isOpen, onClose, onAdd }: AddExpenseModalProps
               required
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t.expenses.description}</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional description..."
+              placeholder={t.expenses.optionalDescription}
               rows={3}
             />
           </div>
-          
+
           <div className="flex justify-end space-x-2">
             <Button
               type="button"
@@ -165,7 +167,7 @@ export function AddExpenseModal({ isOpen, onClose, onAdd }: AddExpenseModalProps
               onClick={handleClose}
               disabled={loading}
             >
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               type="submit"
@@ -174,10 +176,10 @@ export function AddExpenseModal({ isOpen, onClose, onAdd }: AddExpenseModalProps
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding...
+                  {t.expenses.adding}
                 </>
               ) : (
-                'Add Expense'
+                t.expenses.addExpense
               )}
             </Button>
           </div>
