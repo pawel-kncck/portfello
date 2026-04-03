@@ -105,3 +105,30 @@ Started: 2026-04-02
 - docker build: Success (image built)
 
 ---
+
+## Session: 2026-04-03 14:00
+
+### Todo List:
+- [x] Replace empty baseline migration with proper initial migration
+
+### Changes:
+
+#### 14:00 - Replace empty baseline migration with real CREATE TABLE statements
+**Files Deleted**: 
+- `drizzle/0000_tough_roulette.sql` - Empty baseline migration (SELECT 1)
+- `drizzle/meta/0000_snapshot.json` - Old snapshot
+
+**Files Created**: 
+- `drizzle/0000_cooing_sunset_bain.sql` - Full initial migration with all CREATE TABLE statements
+- `drizzle/meta/0000_snapshot.json` - Updated snapshot
+
+**Files Modified**:
+- `drizzle/meta/_journal.json` - Reset entries, then regenerated via drizzle-kit generate
+
+**Details**:
+- The previous migration was an empty no-op (SELECT 1) that assumed tables already existed from Prisma
+- On a fresh database, this meant no tables would be created, causing the app to fail
+- Ran `npx drizzle-kit generate` to produce a proper migration from the Drizzle schema
+- New migration creates all 5 tables (users, accounts, sessions, verification_tokens, expenses) with proper columns, constraints, foreign keys, and indexes
+
+---
