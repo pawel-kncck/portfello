@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { AppSidebar } from '@/components/AppSidebar'
+import { pl } from '../../lib/i18n/pl'
 
 // Mock next/navigation
 const mockPathname = '/dashboard'
@@ -19,16 +19,38 @@ vi.mock('next-auth/react', () => ({
   signOut: vi.fn(),
 }))
 
+// Mock i18n - default Polish
+vi.mock('@/lib/i18n/context', () => {
+  return {
+    useI18n: () => ({
+      t: pl,
+      language: 'pl',
+      currency: 'PLN',
+      setLanguage: vi.fn(),
+      setCurrency: vi.fn(),
+      formatCurrency: (amount: number) => `${amount.toFixed(2)} zl`,
+      formatDate: (date: string) => date,
+      formatMonthYear: (date: string) => date,
+      saveSettings: vi.fn(),
+      settingsLoaded: true,
+    }),
+  }
+})
+
+// Need to import after mocks
+import { AppSidebar } from '@/components/AppSidebar'
+
 describe('AppSidebar', () => {
   beforeEach(() => {
     document.body.style.overflow = ''
   })
 
-  it('renders the sidebar with navigation links', () => {
+  it('renders the sidebar with navigation links in Polish', () => {
     render(<AppSidebar />)
     expect(screen.getByText('Portfello')).toBeInTheDocument()
-    expect(screen.getByText('Dashboard')).toBeInTheDocument()
-    expect(screen.getByText('Analytics')).toBeInTheDocument()
+    expect(screen.getByText('Panel glowny')).toBeInTheDocument()
+    expect(screen.getByText('Analityka')).toBeInTheDocument()
+    expect(screen.getByText('Ustawienia')).toBeInTheDocument()
   })
 
   it('renders mobile menu toggle button', () => {
@@ -60,7 +82,6 @@ describe('AppSidebar', () => {
     const user = userEvent.setup()
     render(<AppSidebar />)
 
-    // Backdrop should not exist initially
     expect(screen.queryByTestId('sidebar-backdrop')).not.toBeInTheDocument()
 
     await user.click(screen.getByTestId('mobile-menu-toggle'))
@@ -125,8 +146,13 @@ describe('AppSidebar', () => {
     expect(screen.getByText('test@example.com')).toBeInTheDocument()
   })
 
-  it('renders logout button', () => {
+  it('renders logout button in Polish', () => {
     render(<AppSidebar />)
-    expect(screen.getByText('Logout')).toBeInTheDocument()
+    expect(screen.getByText('Wyloguj')).toBeInTheDocument()
+  })
+
+  it('renders settings link', () => {
+    render(<AppSidebar />)
+    expect(screen.getByText('Ustawienia')).toBeInTheDocument()
   })
 })

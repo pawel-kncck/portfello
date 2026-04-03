@@ -1,6 +1,26 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { pl } from '../../lib/i18n/pl'
+
+// Mock i18n - default Polish
+vi.mock('@/lib/i18n/context', () => {
+  return {
+    useI18n: () => ({
+      t: pl,
+      language: 'pl',
+      currency: 'PLN',
+      setLanguage: vi.fn(),
+      setCurrency: vi.fn(),
+      formatCurrency: (amount: number) => `${amount.toFixed(2)} zl`,
+      formatDate: (date: string) => date,
+      formatMonthYear: (date: string) => date,
+      saveSettings: vi.fn(),
+      settingsLoaded: true,
+    }),
+  }
+})
+
 import { LoginForm } from '@/components/LoginForm'
 
 describe('LoginForm', () => {
@@ -9,15 +29,15 @@ describe('LoginForm', () => {
     onSwitchToSignup: vi.fn(),
   }
 
-  it('renders email and password fields', () => {
+  it('renders email and password fields in Polish', () => {
     render(<LoginForm {...defaultProps} />)
     expect(screen.getByLabelText('Email')).toBeInTheDocument()
-    expect(screen.getByLabelText('Password')).toBeInTheDocument()
+    expect(screen.getByLabelText('Haslo')).toBeInTheDocument()
   })
 
-  it('renders submit button', () => {
+  it('renders submit button in Polish', () => {
     render(<LoginForm {...defaultProps} />)
-    const submitBtn = screen.getByRole('button', { name: 'Sign In' })
+    const submitBtn = screen.getByRole('button', { name: 'Zaloguj sie' })
     expect(submitBtn).toHaveAttribute('type', 'submit')
   })
 
@@ -28,8 +48,8 @@ describe('LoginForm', () => {
     render(<LoginForm {...defaultProps} onLogin={onLogin} />)
 
     await user.type(screen.getByLabelText('Email'), 'test@example.com')
-    await user.type(screen.getByLabelText('Password'), 'password123')
-    await user.click(screen.getByRole('button', { name: 'Sign In' }))
+    await user.type(screen.getByLabelText('Haslo'), 'password123')
+    await user.click(screen.getByRole('button', { name: 'Zaloguj sie' }))
 
     expect(onLogin).toHaveBeenCalledWith('test@example.com', 'password123')
   })
@@ -37,16 +57,16 @@ describe('LoginForm', () => {
   it('displays error message on login failure', async () => {
     const onLogin = vi
       .fn()
-      .mockResolvedValue({ success: false, error: 'Invalid credentials' })
+      .mockResolvedValue({ success: false, error: 'Nieprawidlowe dane' })
     const user = userEvent.setup()
 
     render(<LoginForm {...defaultProps} onLogin={onLogin} />)
 
     await user.type(screen.getByLabelText('Email'), 'test@example.com')
-    await user.type(screen.getByLabelText('Password'), 'wrong')
-    await user.click(screen.getByRole('button', { name: 'Sign In' }))
+    await user.type(screen.getByLabelText('Haslo'), 'wrong')
+    await user.click(screen.getByRole('button', { name: 'Zaloguj sie' }))
 
-    expect(await screen.findByText('Invalid credentials')).toBeInTheDocument()
+    expect(await screen.findByText('Nieprawidlowe dane')).toBeInTheDocument()
   })
 
   it('calls onSwitchToSignup when sign up link is clicked', async () => {
@@ -55,7 +75,7 @@ describe('LoginForm', () => {
 
     render(<LoginForm {...defaultProps} onSwitchToSignup={onSwitchToSignup} />)
 
-    await user.click(screen.getByRole('button', { name: 'Sign up' }))
+    await user.click(screen.getByRole('button', { name: 'Zarejestruj sie' }))
 
     expect(onSwitchToSignup).toHaveBeenCalled()
   })
