@@ -32,12 +32,12 @@ describe('LoginForm', () => {
   it('renders email and password fields in Polish', () => {
     render(<LoginForm {...defaultProps} />)
     expect(screen.getByLabelText('Email')).toBeInTheDocument()
-    expect(screen.getByLabelText('Haslo')).toBeInTheDocument()
+    expect(screen.getByLabelText('Hasło')).toBeInTheDocument()
   })
 
   it('renders submit button in Polish', () => {
     render(<LoginForm {...defaultProps} />)
-    const submitBtn = screen.getByRole('button', { name: 'Zaloguj sie' })
+    const submitBtn = screen.getByRole('button', { name: 'Zaloguj się' })
     expect(submitBtn).toHaveAttribute('type', 'submit')
   })
 
@@ -48,8 +48,8 @@ describe('LoginForm', () => {
     render(<LoginForm {...defaultProps} onLogin={onLogin} />)
 
     await user.type(screen.getByLabelText('Email'), 'test@example.com')
-    await user.type(screen.getByLabelText('Haslo'), 'password123')
-    await user.click(screen.getByRole('button', { name: 'Zaloguj sie' }))
+    await user.type(screen.getByLabelText('Hasło'), 'password123')
+    await user.click(screen.getByRole('button', { name: 'Zaloguj się' }))
 
     expect(onLogin).toHaveBeenCalledWith('test@example.com', 'password123')
   })
@@ -57,16 +57,16 @@ describe('LoginForm', () => {
   it('displays error message on login failure', async () => {
     const onLogin = vi
       .fn()
-      .mockResolvedValue({ success: false, error: 'Nieprawidlowe dane' })
+      .mockResolvedValue({ success: false, error: 'Nieprawidłowe dane' })
     const user = userEvent.setup()
 
     render(<LoginForm {...defaultProps} onLogin={onLogin} />)
 
     await user.type(screen.getByLabelText('Email'), 'test@example.com')
-    await user.type(screen.getByLabelText('Haslo'), 'wrong')
-    await user.click(screen.getByRole('button', { name: 'Zaloguj sie' }))
+    await user.type(screen.getByLabelText('Hasło'), 'wrong')
+    await user.click(screen.getByRole('button', { name: 'Zaloguj się' }))
 
-    expect(await screen.findByText('Nieprawidlowe dane')).toBeInTheDocument()
+    expect(await screen.findByText('Nieprawidłowe dane')).toBeInTheDocument()
   })
 
   it('calls onSwitchToSignup when sign up link is clicked', async () => {
@@ -75,7 +75,7 @@ describe('LoginForm', () => {
 
     render(<LoginForm {...defaultProps} onSwitchToSignup={onSwitchToSignup} />)
 
-    await user.click(screen.getByRole('button', { name: 'Zarejestruj sie' }))
+    await user.click(screen.getByRole('button', { name: 'Zarejestruj się' }))
 
     expect(onSwitchToSignup).toHaveBeenCalled()
   })

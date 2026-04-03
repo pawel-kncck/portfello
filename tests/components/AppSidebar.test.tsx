@@ -62,7 +62,7 @@ describe('AppSidebar', () => {
   it('renders the sidebar with navigation links in Polish', () => {
     render(<AppSidebar />)
     expect(screen.getByText('Portfello')).toBeInTheDocument()
-    expect(screen.getByText('Panel glowny')).toBeInTheDocument()
+    expect(screen.getByText('Panel główny')).toBeInTheDocument()
     expect(screen.getByText('Analityka')).toBeInTheDocument()
     expect(screen.getByText('Ustawienia')).toBeInTheDocument()
   })

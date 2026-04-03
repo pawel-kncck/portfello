@@ -30,12 +30,12 @@ describe('SettingsView', () => {
   it('renders settings page title in Polish', () => {
     render(<SettingsView />)
     expect(screen.getByText('Ustawienia')).toBeInTheDocument()
-    expect(screen.getByText('Zarzadzaj preferencjami aplikacji')).toBeInTheDocument()
+    expect(screen.getByText('Zarządzaj preferencjami aplikacji')).toBeInTheDocument()
   })
 
   it('renders language and currency sections', () => {
     render(<SettingsView />)
-    expect(screen.getByText('Jezyk')).toBeInTheDocument()
+    expect(screen.getByText('Język')).toBeInTheDocument()
     expect(screen.getByText('Waluta')).toBeInTheDocument()
   })
 
@@ -69,6 +69,6 @@ describe('SettingsView', () => {
 
     await user.click(screen.getByText('Zapisz'))
 
-    expect(await screen.findByText('Nie udalo sie zapisac ustawien')).toBeInTheDocument()
+    expect(await screen.findByText('Nie udało się zapisać ustawień')).toBeInTheDocument()
   })
 })
