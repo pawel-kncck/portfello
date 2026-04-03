@@ -282,3 +282,24 @@ Started: 2026-04-02
 - All 34 tests pass
 
 ---
+
+## Session: 2026-04-03 21:00
+
+### Todo List:
+- [x] Rename "Space(s)" to "Wallet(s)" in PRD documentation
+
+### Changes:
+
+#### 21:00 - Rename Space(s) to Wallet(s) in PRD
+**Files Modified**: 
+- `docs/prd.md` - Replaced all occurrences of Space/Spaces with Wallet/Wallets (prose, data model entities, field names, API endpoints)
+
+**Details**:
+- Renamed entity `Space` → `Wallet`, `SpaceMember` → `WalletMember`
+- Renamed field `spaceId` → `walletId` throughout data model
+- Updated all API endpoints from `/api/spaces/...` to `/api/wallets/...`
+- Updated all prose references (per-space → per-wallet, space switcher → wallet switcher, etc.)
+- Updated example inbound email from `space-abc123@` to `wallet-abc123@`
+- 83 occurrences replaced, 0 remaining
+
+---
