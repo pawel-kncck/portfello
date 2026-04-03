@@ -209,3 +209,76 @@ Started: 2026-04-02
 - All 19 tests passing (10 new + 9 existing)
 
 ---
+
+## Session: 2026-04-03 20:00
+
+### Todo List:
+- [x] Create i18n infrastructure (translation files, context, hook)
+- [x] Add user settings (language/currency) to database schema + migration
+- [x] Create user settings API endpoint
+- [x] Create settings page with language selector
+- [x] Add settings link to sidebar
+- [x] Update all components to use translations and PLN currency
+- [x] Write tests
+- [x] Update development log and push
+
+### Changes:
+
+#### 20:05 - Create i18n infrastructure
+**Commit**: `9d94f3e` - `feat(i18n): add i18n infrastructure with Polish and English translations`
+**Files Created**:
+- `lib/i18n/pl.ts` - Polish translation file with all UI strings
+- `lib/i18n/en.ts` - English translation file with all UI strings
+- `lib/i18n/types.ts` - TypeScript types for translations, Language, Currency
+- `lib/i18n/index.ts` - Barrel exports
+- `lib/i18n/context.tsx` - React context provider with useI18n hook
+
+**Files Modified**:
+- `components/Providers.tsx` - Added I18nProvider wrapping the app
+
+**Details**:
+- Created full i18n system without external libraries using React Context
+- Polish (pl) is the default language, PLN is the default currency
+- Context provides: t (translations), formatCurrency, formatDate, formatMonthYear, saveSettings
+- Currency formatting uses Intl.NumberFormat for proper locale-aware formatting
+
+#### 20:08 - Add user settings to database schema
+**Commit**: `56080d2` - `feat(db): add language and currency columns to users table`
+**Files Modified**:
+- `lib/schema.ts` - Added language (varchar, default 'pl') and currency (varchar, default 'PLN') columns
+
+**Files Created**:
+- `drizzle/0001_fearless_terrax.sql` - Generated migration for new columns
+
+#### 20:10 - Create user settings API endpoint
+**Commit**: `741a7b2` - `feat(api): add settings API endpoint for language and currency`
+**Files Created**:
+- `app/api/settings/route.ts` - GET and PUT endpoints with Zod validation
+
+#### 20:12 - Create settings page and sidebar link
+**Commit**: `d6964af` - `feat(settings): add settings page with language and currency selectors`
+**Files Created**:
+- `app/(app)/settings/page.tsx` - Settings page route
+- `components/SettingsView.tsx` - Settings UI with language/currency dropdowns
+
+**Files Modified**:
+- `components/AppSidebar.tsx` - Added Settings nav link, translated all nav labels
+
+#### 20:15 - Translate all components
+**Commit**: `6fcf1ac` - `feat(i18n): translate all components to support Polish and English`
+**Files Modified**:
+- `components/DashboardView.tsx`, `AnalyticsView.tsx`, `ExpenseList.tsx` - Translated, formatCurrency
+- `components/AddExpenseModal.tsx`, `EditExpenseModal.tsx` - Labels, buttons, errors translated
+- `components/LoginForm.tsx`, `SignupForm.tsx` - Auth text translated
+- `app/layout.tsx` - Changed html lang from "en" to "pl"
+
+#### 20:18 - Write tests
+**Commit**: `8e7d55d` - `test(i18n): add and update tests for i18n and settings`
+**Files Modified/Created**:
+- Updated: `tests/components/AppSidebar.test.tsx`, `LoginForm.test.tsx`
+- Created: `tests/components/SettingsView.test.tsx`, `tests/unit/i18n.test.ts`
+
+**Details**:
+- All 34 tests pass
+
+---
