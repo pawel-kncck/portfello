@@ -2,7 +2,7 @@
 
 ## Overview
 
-Portfello is an expense tracking web application built around **Spaces** — shared or personal containers for expenses. Users sign up, organize expenses into spaces, and visualize spending patterns through a dashboard and analytics page. Spaces allow couples, families, or roommates to track shared finances together while keeping personal expenses separate.
+Portfello is an expense tracking web application built around **Wallets** — shared or personal containers for expenses. Users sign up, organize expenses into wallets, and visualize spending patterns through a dashboard and analytics page. Wallets allow couples, families, or roommates to track shared finances together while keeping personal expenses separate.
 
 ---
 
@@ -27,9 +27,9 @@ Individuals and households who want to track expenses across personal and shared
 **Protected routes:** `/dashboard`, `/analytics`, `/api/**` (except health)
 **Public routes:** `/login`, `/signup`
 
-### 2. Spaces
+### 2. Wallets
 
-A Space is the core organizational unit. It owns expenses, categories, and bank accounts. All members of a space see everything in it.
+A Wallet is the core organizational unit. It owns expenses, categories, and bank accounts. All members of a wallet see everything in it.
 
 #### Types
 
@@ -40,19 +40,19 @@ A Space is the core organizational unit. It owns expenses, categories, and bank 
 
 #### Membership
 
-| Role | Can view expenses | Can add/edit/delete expenses | Can manage categories | Can manage bank accounts | Can invite/remove members | Can delete space |
+| Role | Can view expenses | Can add/edit/delete expenses | Can manage categories | Can manage bank accounts | Can invite/remove members | Can delete wallet |
 |------|---|---|---|---|---|---|
 | **Owner** | Yes | Yes | Yes | Yes | Yes | Yes |
 | **Member** | Yes | Yes | Yes | Yes | No | No |
 
-- A personal space has exactly one member (the owner). It cannot be converted to shared.
-- A shared space has one owner (the creator) and one or more members.
-- Removing a member does not delete their previously created expenses — expenses belong to the space.
-- Every user sees a list of all spaces they belong to and can switch between them.
+- A personal wallet has exactly one member (the owner). It cannot be converted to shared.
+- A shared wallet has one owner (the creator) and one or more members.
+- Removing a member does not delete their previously created expenses — expenses belong to the wallet.
+- Every user sees a list of all wallets they belong to and can switch between them.
 
 #### Categories
 
-Categories are **per-space**, not global or per-user. Categories are **hierarchical** — each category can have subcategories to any depth.
+Categories are **per-wallet**, not global or per-user. Categories are **hierarchical** — each category can have subcategories to any depth.
 
 ```
 Food
@@ -69,9 +69,9 @@ Children
   └─ Activities
 ```
 
-- Each new space starts with a default category tree (configurable)
-- Members can add, rename, reparent, or delete categories within a space
-- Changing a category name or color updates it for all members and all existing expenses in that space
+- Each new wallet starts with a default category tree (configurable)
+- Members can add, rename, reparent, or delete categories within a wallet
+- Changing a category name or color updates it for all members and all existing expenses in that wallet
 - Deleting a category requires reassigning its expenses to another category
 - Analytics can roll up to any level of the hierarchy (e.g., all "Food" or just "Food > Groceries")
 
@@ -79,7 +79,7 @@ Children
 
 Tags provide a **cross-cutting dimension** alongside the category hierarchy. An expense has exactly one category but can have zero or many tags.
 
-- Tags are per-space, like categories
+- Tags are per-wallet, like categories
 - Tags are flat (no hierarchy) — keep them simple
 - Examples: `children`, `vacation`, `work`, `recurring`, `gift`
 - Tags can be applied manually, by categorization rules, or by AI
@@ -87,28 +87,28 @@ Tags provide a **cross-cutting dimension** alongside the category hierarchy. An 
 
 #### Bank Accounts
 
-A bank account is linked to exactly one space. This association is what drives CSV import routing.
+A bank account is linked to exactly one wallet. This association is what drives CSV import routing.
 
 | Field | Rules |
 |-------|-------|
 | `name` | Required (e.g., "Joint Checking", "Pawel's Savings") |
-| `accountNumber` | Required, unique across all spaces |
+| `accountNumber` | Required, unique across all wallets |
 | `bankName` | Optional |
 
-- Any space member can add or remove bank accounts
-- An account number cannot belong to two spaces simultaneously
+- Any wallet member can add or remove bank accounts
+- An account number cannot belong to two wallets simultaneously
 
 ### 3. Expense Management
 
-Each expense belongs to a space. All members of that space can view, edit, and delete it.
+Each expense belongs to a wallet. All members of that wallet can view, edit, and delete it.
 
 | Field | Type | Rules |
 |-------|------|-------|
 | `amount` | Decimal(10,2) | Required, always positive |
 | `direction` | Enum | `outflow` (money out) or `inflow` (money in) |
 | `type` | Enum | `expense`, `income`, or `cost_reduction` |
-| `category` | Reference | Required, must be a category in the same space |
-| `tags` | Reference[] | Zero or more tags from the same space |
+| `category` | Reference | Required, must be a category in the same wallet |
+| `tags` | Reference[] | Zero or more tags from the same wallet |
 | `date` | Date | Required, defaults to today |
 | `description` | String | Optional, max 500 chars |
 | `createdBy` | Reference | Auto-set to current user |
@@ -124,7 +124,7 @@ Each expense belongs to a space. All members of that space can view, edit, and d
 - **Delete** — single-click
 - **List** — recent 10 on dashboard, all on analytics (with time filter)
 
-Access control is at the space level: if you're a member, you can do everything. No per-expense ownership restrictions.
+Access control is at the wallet level: if you're a member, you can do everything. No per-expense ownership restrictions.
 
 #### Cost Reductions (Returns)
 
@@ -138,7 +138,7 @@ In Portfello, an inflow can be classified as a **cost reduction** instead of inc
 
 ### 4. Categorization Rules
 
-A per-space rule engine that deterministically categorizes, tags, and classifies expenses. Rules are cheaper and more predictable than AI — they run first, and AI fills in what rules don't cover.
+A per-wallet rule engine that deterministically categorizes, tags, and classifies expenses. Rules are cheaper and more predictable than AI — they run first, and AI fills in what rules don't cover.
 
 #### Rule Format
 
@@ -208,14 +208,14 @@ Rules are defined as a JSON array, ordered by priority (first match for category
 
 ### 5. CSV Import
 
-Users can upload a CSV file containing bank transactions. The app parses it, routes transactions to the correct spaces based on account number, applies categorization rules, and deduplicates against existing data.
+Users can upload a CSV file containing bank transactions. The app parses it, routes transactions to the correct wallets based on account number, applies categorization rules, and deduplicates against existing data.
 
 **Flow:**
 1. User uploads a CSV (from any page or a dedicated import page)
 2. App parses the file and groups transactions by account number
 3. For each account number:
-   - If it matches a known bank account → transactions are assigned to that bank account's space
-   - If it does not match → user is prompted to either link it to an existing space or create a new one
+   - If it matches a known bank account → transactions are assigned to that bank account's wallet
+   - If it does not match → user is prompted to either link it to an existing wallet or create a new one
 4. Deduplication runs — flagged duplicates are highlighted for review
 5. Categorization rules run, then AI fills gaps
 6. User reviews the grouped transactions, confirms categories/tags, resolves duplicates, and imports
@@ -230,7 +230,7 @@ Users can upload a CSV file containing bank transactions. The app parses it, rou
 Receipts and invoices arrive via email. Portfello accepts forwarded emails, extracts documents, and matches them to existing expenses.
 
 **Inbound email flow:**
-1. Each space has a unique inbound email address (e.g., `space-abc123@in.portfello.lr15a.pl`)
+1. Each wallet has a unique inbound email address (e.g., `wallet-abc123@in.portfello.lr15a.pl`)
 2. User forwards a receipt or invoice email to this address (or sets up a Gmail/mail rule to auto-forward)
 3. Portfello receives the email, extracts:
    - Attachments (PDF invoices, images)
@@ -252,11 +252,11 @@ Receipts and invoices arrive via email. Portfello accepts forwarded emails, extr
 **Document storage:**
 - Documents stored as files (S3-compatible object storage or local filesystem)
 - Metadata (vendor, extracted amount, matched expense) stored in the database
-- Documents are per-space — all members can view them
+- Documents are per-wallet — all members can view them
 
 ### 7. Deduplication
 
-The same transaction can arrive from up to four sources: CSV upload, bank API, manual entry, and AI agent. Two users in the same space can also upload overlapping CSVs. The app must detect and handle duplicates.
+The same transaction can arrive from up to four sources: CSV upload, bank API, manual entry, and AI agent. Two users in the same wallet can also upload overlapping CSVs. The app must detect and handle duplicates.
 
 **Dedup strategy:**
 
@@ -275,9 +275,9 @@ The same transaction can arrive from up to four sources: CSV upload, bank API, m
 
 ### 8. Dashboard (`/dashboard`)
 
-Everything on the dashboard is scoped to the **currently selected space**.
+Everything on the dashboard is scoped to the **currently selected wallet**.
 
-**Space switcher** in the sidebar — lists all spaces the user belongs to. Active space is highlighted.
+**Wallet switcher** in the sidebar — lists all wallets the user belongs to. Active wallet is highlighted.
 
 **Summary cards** (3-column grid):
 
@@ -296,7 +296,7 @@ Everything on the dashboard is scoped to the **currently selected space**.
 
 ### 9. Analytics (`/analytics`)
 
-Scoped to the currently selected space.
+Scoped to the currently selected wallet.
 
 **Time range filter:** All Time (default), This Year, This Month
 
@@ -328,46 +328,46 @@ User
   passwordHash    String
   createdAt       DateTime
 
-Space
+Wallet
   id              UUID (pk)
   name            String
   type            'personal' | 'shared'
   inboundEmail    String (unique, auto-generated)
   createdAt       DateTime
 
-SpaceMember
+WalletMember
   id              UUID (pk)
-  spaceId         UUID → Space
+  walletId        UUID → Wallet
   userId          UUID → User
   role            'owner' | 'member'
   joinedAt        DateTime
-  @@unique([spaceId, userId])
+  @@unique([walletId, userId])
 
 Category
   id              UUID (pk)
-  spaceId         UUID → Space
+  walletId        UUID → Wallet
   parentId        UUID? → Category (self-referential, null = root)
   name            String
   color           String (hex)
   sortOrder       Int
-  @@unique([spaceId, parentId, name])
+  @@unique([walletId, parentId, name])
 
 Tag
   id              UUID (pk)
-  spaceId         UUID → Space
+  walletId        UUID → Wallet
   name            String
-  @@unique([spaceId, name])
+  @@unique([walletId, name])
 
 BankAccount
   id              UUID (pk)
-  spaceId         UUID → Space
+  walletId        UUID → Wallet
   accountNumber   String (unique)
   name            String
   bankName        String?
 
 Rule
   id              UUID (pk)
-  spaceId         UUID → Space
+  walletId        UUID → Wallet
   name            String
   priority        Int (lower = higher priority)
   conditions      JSON
@@ -378,7 +378,7 @@ Rule
 
 Expense
   id              UUID (pk)
-  spaceId         UUID → Space
+  walletId        UUID → Wallet
   categoryId      UUID → Category
   createdById     UUID → User
   bankAccountId   UUID? → BankAccount
@@ -401,7 +401,7 @@ ExpenseTag
 Document
   id              UUID (pk)
   expenseId       UUID? → Expense (null if unmatched)
-  spaceId         UUID → Space
+  walletId        UUID → Wallet
   fileName        String
   fileUrl          String (path or S3 URL)
   mimeType        String
@@ -412,7 +412,7 @@ Document
 
 InboundEmail
   id              UUID (pk)
-  spaceId         UUID → Space
+  walletId        UUID → Wallet
   fromAddress     String
   subject         String
   receivedAt      DateTime
@@ -423,72 +423,72 @@ InboundEmail
 
 ## API
 
-All endpoints require a valid session (or API token). Access is scoped to spaces the user is a member of.
+All endpoints require a valid session (or API token). Access is scoped to wallets the user is a member of.
 
-**Spaces**
+**Wallets**
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| `GET` | `/api/spaces` | List user's spaces |
-| `POST` | `/api/spaces` | Create a shared space |
-| `PUT` | `/api/spaces/[id]` | Update space name |
-| `DELETE` | `/api/spaces/[id]` | Delete space (owner only) |
-| `POST` | `/api/spaces/[id]/members` | Invite member by email |
-| `DELETE` | `/api/spaces/[id]/members/[userId]` | Remove member (owner only) |
+| `GET` | `/api/wallets` | List user's wallets |
+| `POST` | `/api/wallets` | Create a shared wallet |
+| `PUT` | `/api/wallets/[id]` | Update wallet name |
+| `DELETE` | `/api/wallets/[id]` | Delete wallet (owner only) |
+| `POST` | `/api/wallets/[id]/members` | Invite member by email |
+| `DELETE` | `/api/wallets/[id]/members/[userId]` | Remove member (owner only) |
 
 **Categories**
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| `GET` | `/api/spaces/[id]/categories` | List category tree |
-| `POST` | `/api/spaces/[id]/categories` | Add category (with optional parentId) |
-| `PUT` | `/api/spaces/[id]/categories/[catId]` | Rename, recolor, or reparent |
-| `DELETE` | `/api/spaces/[id]/categories/[catId]` | Delete (requires reassignment) |
+| `GET` | `/api/wallets/[id]/categories` | List category tree |
+| `POST` | `/api/wallets/[id]/categories` | Add category (with optional parentId) |
+| `PUT` | `/api/wallets/[id]/categories/[catId]` | Rename, recolor, or reparent |
+| `DELETE` | `/api/wallets/[id]/categories/[catId]` | Delete (requires reassignment) |
 
 **Tags**
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| `GET` | `/api/spaces/[id]/tags` | List tags |
-| `POST` | `/api/spaces/[id]/tags` | Create tag |
-| `PUT` | `/api/spaces/[id]/tags/[tagId]` | Rename tag |
-| `DELETE` | `/api/spaces/[id]/tags/[tagId]` | Delete tag (removed from all expenses) |
+| `GET` | `/api/wallets/[id]/tags` | List tags |
+| `POST` | `/api/wallets/[id]/tags` | Create tag |
+| `PUT` | `/api/wallets/[id]/tags/[tagId]` | Rename tag |
+| `DELETE` | `/api/wallets/[id]/tags/[tagId]` | Delete tag (removed from all expenses) |
 
 **Rules**
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| `GET` | `/api/spaces/[id]/rules` | List rules (ordered by priority) |
-| `POST` | `/api/spaces/[id]/rules` | Create rule |
-| `PUT` | `/api/spaces/[id]/rules/[ruleId]` | Update rule |
-| `DELETE` | `/api/spaces/[id]/rules/[ruleId]` | Delete rule |
-| `PUT` | `/api/spaces/[id]/rules/reorder` | Reorder rule priorities |
+| `GET` | `/api/wallets/[id]/rules` | List rules (ordered by priority) |
+| `POST` | `/api/wallets/[id]/rules` | Create rule |
+| `PUT` | `/api/wallets/[id]/rules/[ruleId]` | Update rule |
+| `DELETE` | `/api/wallets/[id]/rules/[ruleId]` | Delete rule |
+| `PUT` | `/api/wallets/[id]/rules/reorder` | Reorder rule priorities |
 
 **Bank Accounts**
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| `GET` | `/api/spaces/[id]/bank-accounts` | List bank accounts |
-| `POST` | `/api/spaces/[id]/bank-accounts` | Link bank account |
-| `DELETE` | `/api/spaces/[id]/bank-accounts/[accId]` | Unlink bank account |
+| `GET` | `/api/wallets/[id]/bank-accounts` | List bank accounts |
+| `POST` | `/api/wallets/[id]/bank-accounts` | Link bank account |
+| `DELETE` | `/api/wallets/[id]/bank-accounts/[accId]` | Unlink bank account |
 
 **Expenses**
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| `GET` | `/api/spaces/[id]/expenses` | List expenses (date desc, filterable by tag, category, type, date range) |
-| `POST` | `/api/spaces/[id]/expenses` | Create expense (dedup check runs automatically) |
-| `PUT` | `/api/spaces/[id]/expenses/[expId]` | Update expense |
-| `DELETE` | `/api/spaces/[id]/expenses/[expId]` | Delete expense |
+| `GET` | `/api/wallets/[id]/expenses` | List expenses (date desc, filterable by tag, category, type, date range) |
+| `POST` | `/api/wallets/[id]/expenses` | Create expense (dedup check runs automatically) |
+| `PUT` | `/api/wallets/[id]/expenses/[expId]` | Update expense |
+| `DELETE` | `/api/wallets/[id]/expenses/[expId]` | Delete expense |
 
 **Import & Documents**
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| `POST` | `/api/spaces/[id]/import/csv` | Upload CSV, returns grouped preview with dedup flags |
-| `POST` | `/api/spaces/[id]/import/confirm` | Confirm and save imported transactions |
-| `POST` | `/api/spaces/[id]/documents` | Upload document, attempt match to expense |
-| `GET` | `/api/spaces/[id]/documents` | List documents (matched and unmatched) |
+| `POST` | `/api/wallets/[id]/import/csv` | Upload CSV, returns grouped preview with dedup flags |
+| `POST` | `/api/wallets/[id]/import/confirm` | Confirm and save imported transactions |
+| `POST` | `/api/wallets/[id]/documents` | Upload document, attempt match to expense |
+| `GET` | `/api/wallets/[id]/documents` | List documents (matched and unmatched) |
 | `POST` | `/api/inbound-email` | Webhook for incoming email (internal, authenticated by secret) |
 
 **Other**
@@ -507,7 +507,7 @@ All endpoints require a valid session (or API token). Access is scoped to spaces
 - Email: valid format
 - Password: min 8 characters
 - Name: 1-100 characters
-- Space name: 1-100 characters
+- Wallet name: 1-100 characters
 - Amount: positive number
 - Category name: 1-50 characters
 - Account number: 1-34 characters (IBAN max)
@@ -520,10 +520,10 @@ Duplicate email on signup returns a generic error (no user enumeration).
 
 ## UI/UX
 
-- **Layout:** fixed left sidebar (logo, space switcher, nav, user profile, logout) + scrollable main content
-- **Space switcher:** dropdown or list in sidebar showing all user's spaces, with the active space highlighted
+- **Layout:** fixed left sidebar (logo, wallet switcher, nav, user profile, logout) + scrollable main content
+- **Wallet switcher:** dropdown or list in sidebar showing all user's wallets, with the active wallet highlighted
 - **Responsive:** 3-column cards on desktop, single column on mobile
-- **Category colors:** configurable per category, per space
+- **Category colors:** configurable per category, per wallet
 - **Loading states:** skeleton placeholders in lists, spinners in buttons and analytics
 - **Error handling:** form-level alerts (destructive variant), user-friendly messages
 
@@ -550,7 +550,7 @@ Duplicate email on signup returns a generic error (no user enumeration).
 
 - Passwords hashed with bcryptjs (12-round salt)
 - JWT session strategy (no server-side session storage)
-- Space membership checks on all data access and mutations
+- Wallet membership checks on all data access and mutations
 - HSTS, X-Frame-Options DENY, X-Content-Type-Options nosniff, strict Referrer-Policy
 - No secrets in codebase (env vars via Coolify dashboard)
 - Non-root Docker user
@@ -588,7 +588,7 @@ Server-side LLM calls during specific workflows where instant, context-aware sug
 
 | Workflow | AI capability | Fallback if AI unavailable |
 |----------|--------------|---------------------------|
-| **CSV import** | Categorize + tag transactions that rules didn't match, based on description and the space's category tree + history | User manually selects category for each row |
+| **CSV import** | Categorize + tag transactions that rules didn't match, based on description and the wallet's category tree + history | User manually selects category for each row |
 | **Receipt/invoice parsing** | OCR document → extract vendor, amount, date, line items. Suggest category based on line items (e.g., invoice for electronics → "Shopping > Electronics") | User manually enters all fields |
 | **Manual entry** | Suggest category + tags based on description text as user types | User selects from dropdown |
 | **Document matching** | Match incoming documents to existing expenses using amount + date + vendor similarity | User manually links document to expense |
@@ -596,7 +596,7 @@ Server-side LLM calls during specific workflows where instant, context-aware sug
 
 **Design principles:**
 - AI suggestions are always overridable — the user confirms before anything is saved
-- Embedded AI uses the space's own category tree, tags, rules, and historical patterns — not generic labels
+- Embedded AI uses the wallet's own category tree, tags, rules, and historical patterns — not generic labels
 - LLM calls happen server-side (API route), never client-side
 - Graceful degradation — every AI-assisted workflow works fully without AI, just with more manual input
 
