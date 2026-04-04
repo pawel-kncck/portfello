@@ -1,5 +1,15 @@
 # Claude Code Configuration
 
+## Codebase Orientation
+
+- **What**: Expense tracking app with shared wallets (Next.js 16, TypeScript, Drizzle ORM, PostgreSQL 16)
+- **Schema**: `lib/schema.ts` — canonical data model (Drizzle ORM)
+- **API routes**: `app/api/` — organized by resource
+- **Shared logic**: `lib/` — database, rules engine, i18n, wallet utilities
+- **Components**: `components/` — React components (sidebar, modals, managers, forms)
+- **Tests**: `tests/unit/` and `tests/components/` (Vitest)
+- **Full docs map**: `docs/INDEX.md` — start here for detailed documentation
+
 ## Core Requirements
 
 ### 1. Commit Strategy - CRITICAL
@@ -185,7 +195,7 @@ When encountering a critical bug:
 #### Test tooling:
 - Runner: Vitest (`npm test`, `npm run test:watch`, `npm run test:coverage`)
 - Components: @testing-library/react + user-event
-- Mocking: `vi.mock()` for external dependencies (Prisma, auth, etc.)
+- Mocking: `vi.mock()` for external dependencies (Drizzle, auth, etc.)
 
 #### Test granularity per feature type:
 | Feature type | Minimum tests |
@@ -195,7 +205,22 @@ When encountering a critical bug:
 | New utility/lib function | Happy path, edge cases, invalid input |
 | Bug fix | Regression test that reproduces the bug |
 
-### 8. Quality Checks Before Each Commit
+### 8. Documentation Updates
+
+When you change any of the following, update the corresponding doc:
+
+| Change | Update |
+|---|---|
+| Add/modify Drizzle schema (`lib/schema.ts`) | `docs/architecture/data-model.md` |
+| Add/modify API endpoint | `docs/architecture/api.md` |
+| Change tech stack (add/remove dependency) | `docs/architecture/tech-stack.md` |
+| Ship a planned feature from `docs/plans/` | Remove from `docs/plans/roadmap.md`, update `docs/INDEX.md` |
+| Discover a deployment/operational lesson | Add to `docs/learnings/` |
+| Change Dockerfile or deployment config | `docs/architecture/deployment.md` |
+
+**Source of truth rule:** documentation explains *why* and provides context the code can't carry. If a doc restates *what* the code does, the code should be improved instead. When a doc conflicts with the code, the code wins — update the doc.
+
+### 9. Quality Checks Before Each Commit
 
 - [ ] Code runs without errors
 - [ ] **All tests pass (`npm test`)**

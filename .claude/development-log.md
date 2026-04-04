@@ -495,3 +495,55 @@ Started: 2026-04-02
 - Schema tests cover: name validation, color format, sortOrder constraints
 
 ---
+
+## Session: 2026-04-04 10:00
+
+### Todo List:
+- [x] Create docs/ directory structure (architecture/, plans/, learnings/)
+- [x] Create docs/INDEX.md — agent-oriented navigation map
+- [x] Create docs/architecture/data-model.md — Drizzle schema with business rationale
+- [x] Create docs/architecture/api.md — all actual endpoints documented
+- [x] Create docs/architecture/tech-stack.md — actual stack (Drizzle, not Prisma)
+- [x] Create docs/architecture/ai-integration.md — design doc (not yet implemented)
+- [x] Update docs/architecture/deployment.md — corrected for Drizzle
+- [x] Create docs/plans/ — roadmap + individual feature plans
+- [x] Update docs/learnings/deployment-lessons.md — mark Prisma lessons as historical
+- [x] Delete old docs files (prd.md, deployment.md, deployment-lessons.md)
+- [x] Update CLAUDE.md — add codebase orientation, doc update rules, fix Prisma references
+
+### Changes:
+
+#### 10:00 - Restructure docs/ folder
+**Files Created**:
+- `docs/INDEX.md` — Agent-oriented navigation map with codebase layout, documentation map, and implemented vs. planned features
+- `docs/architecture/data-model.md` — Documents actual Drizzle schema from `lib/schema.ts` with entity relationships, invariants, business rationale, and cross-references to API docs
+- `docs/architecture/api.md` — Complete API reference for all 16 endpoint groups with request/response shapes, validation rules, and access control details
+- `docs/architecture/tech-stack.md` — Actual tech stack (Drizzle ORM, not Prisma), key decisions, testing setup
+- `docs/architecture/ai-integration.md` — Two-layer AI architecture design, clearly marked as not yet implemented
+- `docs/architecture/deployment.md` — Updated deployment guide with Drizzle references replacing all Prisma references, matches actual Dockerfile
+- `docs/plans/roadmap.md` — Phased roadmap with dependencies between planned features
+- `docs/plans/cost-reductions.md` — Plan for expense direction/type/linkedExpense schema evolution
+- `docs/plans/csv-import.md` — Plan for CSV import with bank accounts
+- `docs/plans/email-ingestion.md` — Plan for inbound email processing
+- `docs/plans/document-management.md` — Plan for receipt/invoice attachment
+- `docs/plans/deduplication.md` — Plan for multi-source transaction dedup
+- `docs/plans/mobile-app.md` — Plan for native mobile app
+- `docs/learnings/deployment-lessons.md` — Updated with Prisma-specific issues clearly marked as historical
+
+**Files Deleted**:
+- `docs/prd.md` — Content split into architecture/, plans/, and INDEX.md
+- `docs/deployment.md` — Replaced by docs/architecture/deployment.md
+- `docs/deployment-lessons.md` — Replaced by docs/learnings/deployment-lessons.md
+
+**Files Modified**:
+- `CLAUDE.md` — Added "Codebase Orientation" section at top, added "Documentation Updates" rules (section 8), fixed stale Prisma reference in testing section
+
+**Details**:
+- The old docs/ had 3 files with stale Prisma references throughout and no clear separation between existing features and future plans
+- New structure: architecture/ (technical "why"), plans/ (what's not built), learnings/ (post-mortems)
+- No features/ folder — code is the documentation for existing features; docs explain "why" not "what"
+- INDEX.md includes "Source of truth" column so agents know when to trust docs vs. read code
+- All Prisma references removed from active documentation; historical mentions preserved with context in deployment-lessons.md
+- data-model.md and api.md cross-reference each other bidirectionally
+
+---
